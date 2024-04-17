@@ -16,7 +16,7 @@ echoPin = 3
 # Global starting point 
 distanceCm = 0 # will need to change when setting up the aparatus
 polledData = [] # will be updated under normal operation
-PIN = '1234' #can be changed under maintenance adjustment
+pin = '1234' #can be changed under maintenance adjustment
 authorization = 'Allowed'
 #some other parameters which the user can modify under the maintenance adjustment
 pedestrianPresses = 0 #set the following to zero as input subsystem not included in this code
@@ -106,13 +106,14 @@ def velocity(finalDistance, initialDistance, finalTime):
     #else:
         #return avgVel 
 
-def display_main_menu():
+def display_main_menu(pin, distanceCm):
     """
     Used to display the main menu.
         Parameters:
-            Function has no parameters
+            pin (str): used for storing pin
+            distanceCm (str): used for storing distance
         Returns:
-            Function has no returns
+            Function returns pin, distanceCm, newPin, newDistance which indicates the stored data from maintenance mode.
 
     """
     print("\n=== Main Menu ===\n")
@@ -127,7 +128,7 @@ def display_main_menu():
     while True:
         try:
             choice = int(input("Option: "))
-            if choice == 1 or choice == 2 or choice == 3 or choice==0:
+            if choice in [0, 1, 2, 3]:
                 break
             else:
                 print("Error: Invalid option")
@@ -136,45 +137,46 @@ def display_main_menu():
 
     # Process choice
     if choice == 1:
-        normal_mode()
+        normal_mode(distanceCm)
+        return pin, distanceCm
     elif choice == 2:
-        PIN = '1234'
-        authorization = 'Allowed'
-        authorize_user(PIN, authorization)
+        newPin, newDistance = authorize_user(pin, distanceCm)
+        if newPin is not None:
+            return newPin, newDistance
+        else:
+            return pin, distanceCm
     elif choice == 3:
         display_data_observation_menu(polledData)
+        return pin, distanceCm
     elif choice == 0:
         print("Shutting the system down...")
         quit()
 
-def authorize_user(PIN, authorization):
+def authorize_user(pin, distanceCm):
     """
     Used to authorize user to access the Maintenance Adjustment settings
         Parameters:
-            PIN (str): PIN for authorization
-            authorization (str): Status of authorization
+            pin (str): PIN for authorization
+            distanceCm (str): distance in cm
         Returns:
-            Function has no returns
+            Function returns pin and distanceCm, which can be changed by user inputs
     """
     #ask for PIN, 5 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
-    if authorization == 'Allowed':
-        for tries in range(5):
-            userPin = input('\nEnter PIN: ')
+    for tries in range(5):
+        userPin = input('\nEnter PIN: ')
+        if userPin == pin:
+            print('PIN accepted.')
+            return display_maintenance_menu(pin, distanceCm)
+        else:
+            print('Incorrect PIN!')
+    print("You've exceeded the number of tries available and have been locked out. Returning to the main menu..." )
+    return pin, distanceCm
 
-            if userPin != PIN:
-                print('Incorrect PIN!')
-            else:
-                display_maintenance_menu()
-                return
-            
-    authorization = 'Not Allowed'
-    print("You've exceeded the number of tries available and have been locked out. Returning to the main menu...")
-
-def normal_mode():
+def normal_mode(distanceCm):
     """
     Includes the polling loop and displays the distance from nearest vehicle, pedestrian presence and stages of operation.
         Parameters:
-            Function has no parameters
+            distanceCm (str): used to print the distance between vehicles
         Returns:
             Function has no returns
     """
@@ -193,7 +195,7 @@ def normal_mode():
 
             totalTime += (pollingTime)
             #run the output traffic operation sequence 
-            result = traffic_operation_sequence(totalTime)
+            result = traffic_operation_sequence(totalTime, distanceCm)
 
             if result == 'Last Stage reached':
                 totalTime = 0
@@ -214,26 +216,25 @@ def get_sensor_data():
     """
     print('Data is obtained from ultrasonic sensors and added to polledData')
 
-def display_maintenance_menu():
+def display_maintenance_menu(pin, distanceCm):
     """
     Displays menu for Maintenace Adjustment Mode.
         Parameters:
-            Function has no parameters
+            pin (str): for storing the values of the new pin
+            distanceCm (str): for storing the values of the new distance
         Returns:
-            Function has no returns
+            Function returns pin and distanceCm for storage and updated value purposes
     """
     #function should show user what parameters can be changed (PIN and the distance - globals )
-    print ("\n=== Maintainence Adjustment Menu ===\n")
+    print ("\n=== Maintenence Adjustment Menu ===\n")
     print("1: Change PIN")
     print("2: View/update distance (range) in cm")
     print("0: Return to main menu\n")
 
-    PIN = '1234' # Set default PIN
-    distanceCm = 0 # Set default distance
     while True:
         try:
             selection = int(input("Option: "))
-            if selection == 1 or selection == 2 or selection == 0:
+            if selection in [0, 1, 2]:
                 break
             else:
                 print("Invalid Option")
@@ -243,15 +244,15 @@ def display_maintenance_menu():
     if selection == 1:
         #since this function is already inside authorize_user, we dont need to authorize user again
         newPin = input ("Enter new PIN: ")
-        PIN = newPin
+        return newPin, distanceCm
         print (f"PIN changed!")
     elif selection == 2:
         print(f"Current distance is {distanceCm} cm")
         newDistance = int(input("Enter new distance: "))
-        distanceCm = newDistance
-        print("Distance changed!")
+        print('Distance changed!')
+        return pin, newDistance
     elif selection == 0:
-        return
+        return pin, distanceCm
 
 
 def peak_traffic_time(polledData):
@@ -484,7 +485,7 @@ def display_distance_to_nearest_vehicle(distance):
     print(f"The distance to the nearest vehicle is : {distance:.2f} cm") #or should I use round function: round(,2)??
 
 
-def traffic_operation_sequence(totalTime):
+def traffic_operation_sequence(totalTime, distanceCm):
     """
     Main function to control the sequence of traffic light operation according to time.
         Parameters:
@@ -494,7 +495,7 @@ def traffic_operation_sequence(totalTime):
     """
     
     if round(totalTime) % 3 == 0:
-        display_distance_to_nearest_vehicle(distance)
+        display_distance_to_nearest_vehicle(distanceCm)
         # print('The system displays the distance to the nearest vehicle in two decimal cm readings')
   
     if round(totalTime) == 1:
@@ -512,9 +513,19 @@ def traffic_operation_sequence(totalTime):
         return 'Last Stage reached'
 
 def main():
+    """
+    Main function which runs the program and controls the timings between inputted data
+        Paramters:
+            Function has no paramters.
+        Returns:
+            Function has no returns. 
+    """
+    pin = '1234' # set default pin
+    distanceCm = 0 # set default distance
+
     polledData = []  # Initialize polledData here
     while True:
-        display_main_menu()
+        pin, distanceCm = display_main_menu(pin, distanceCm)
 
 if __name__ == '__main__':
     main()
