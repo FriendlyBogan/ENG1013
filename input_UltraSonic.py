@@ -2,12 +2,14 @@
 def ultraSonic(triggerPin,echoPin):
     from pymata4 import pymata4
     import time 
+    import math
     board = pymata4.Pymata4()
     board.set_pin_mode_sonar(triggerPin,echoPin,timeout=150000) 
     ultrasonicData = []
     intialDistance =''
     finalDistance =''
     initialData = []
+    speedingAlarm = False
     try:
         t0 = time.time()
         while True:
@@ -24,8 +26,10 @@ def ultraSonic(triggerPin,echoPin):
                 finalDistance = int(ultrasonicData[6])/100
             try:
                 if intialDistance != '' and finalDistance != '':
-                    speed = (intialDistance - finalDistance) / timeElapsed
-                    print(speed)
+                    speed = math.floor((intialDistance - finalDistance) / timeElapsed,3)
+                    if speed > 0.0210: #trial but please experiment this aswell 
+                        print("CAR IS SPEEDING")
+                        speedingAlarm = True
                     quit()
             except ValueError:
                 InvalidInput = input("invalid distance try again? (Y/N)")
