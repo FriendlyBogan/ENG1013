@@ -31,7 +31,33 @@ MAIN THINGS THAT I CHANGED:
 - authorize_user() now passes as 'authorization' as a paramter and returns the modified value.
 - display_maintenance_menu() initialises 'PIN' and 'distanceCm' with default values to avoid errors for later accessing in the function.
 
+SOME NOTES FOR NEXT MEETING: (Naailah)
+- what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm
+- See how to integrate ultrasonic sensor function and normal_mode() since they both have loops. Also make the distance to nearest vehicle work.
+- ENSURE traffic_operation_sequence(totalTime, sensor_distance) IS NOT DISRUPTED in the process of integrating the sensors
+- for the distance_to_nearest_vehicle, validate the data, if no data available, print relevant message
+- ped_presence (check spelling) should be imported from the input_pedPresence file? how to integrate in the normal mode? Ensure the number of presses displayed at stage 3
+- delete the get_sensor_data function (repetitive, no longer necesary?)
+- See if peak_traffic_time() is working, if not, better to remove it
+- average_velocity() why are there two of them?
+- See how graphs are going and how the data can be accessed for the graphs
+- display_current_stage_traffic_operation(stage) function is unecessary, we can directly print it under the stage functions (use the same ofrmat tho, it looks neat)
+- How to use call-back functions.
+- change pin to user_pin since can be confused with arduino pins
+- Global variables have been initialized twice, change that
+- Get atleast the normal mode working properly with LEDs
+- check with the branched polling loop which i made some changes to
+
+FROM BRIEF:
+- Probe points for current measurement? Use jumper pins not wires (there are guides on moodle)
+- see that there are appropriate print statements
+- The time between polling cycles (time between each cycle of ‘sensor polling’) is between 1 and 5 seconds, Have we included this?
+- DONT FORGET CIRCUIT DIAGRAMS FOR SUBMISSION!!
+- Record working circuit video
+- Finally, remove extra things from the coding files and check coding standards
+- chcek graphs are appropriately formatted
 """
+
 
 def ped_presense(pedestrianPresses):
     """
