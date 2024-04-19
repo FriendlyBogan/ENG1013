@@ -172,7 +172,7 @@ def authorize_user(pin, distanceCm):
     print("You've exceeded the number of tries available and have been locked out. Returning to the main menu..." )
     return pin, distanceCm
 
-def normal_mode(distanceCm):
+def normal_mode():
     """
     Includes the polling loop and displays the distance from nearest vehicle, pedestrian presence and stages of operation.
         Parameters:
@@ -195,7 +195,7 @@ def normal_mode(distanceCm):
 
             totalTime += (pollingTime)
             #run the output traffic operation sequence 
-            result = traffic_operation_sequence(totalTime, distanceCm)
+            result = traffic_operation_sequence(totalTime, polledData[-1])
 
             if result == 'Last Stage reached':
                 totalTime = 0
@@ -485,7 +485,7 @@ def display_distance_to_nearest_vehicle(distance):
     print(f"The distance to the nearest vehicle is : {distance:.2f} cm") #or should I use round function: round(,2)??
 
 
-def traffic_operation_sequence(totalTime, distanceCm):
+def traffic_operation_sequence(totalTime, sensor_distance):
     """
     Main function to control the sequence of traffic light operation according to time.
         Parameters:
@@ -495,7 +495,7 @@ def traffic_operation_sequence(totalTime, distanceCm):
     """
     
     if round(totalTime) % 3 == 0:
-        display_distance_to_nearest_vehicle(distanceCm)
+        display_distance_to_nearest_vehicle(sensor_distance)
         # print('The system displays the distance to the nearest vehicle in two decimal cm readings')
   
     if round(totalTime) == 1:
