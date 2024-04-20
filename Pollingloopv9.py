@@ -44,7 +44,7 @@ SOME NOTES FOR NEXT MEETING: (Naailah)
 - display_current_stage_traffic_operation(stage) function is unecessary, we can directly print it under the stage functions (use the same ofrmat tho, it looks neat)
 - How to use call-back functions.
 - change pin to user_pin since can be confused with arduino pins
-- Global variables have been initialized twice, change that
+- Global variables have been initialized twice, change that !!(changed in the branch)!!
 - Get atleast the normal mode working properly with LEDs
 - check with the branched polling loop which i made some changes to
 
