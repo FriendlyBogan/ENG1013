@@ -1,6 +1,5 @@
-#def pedPresense(pin):
-#TODO: def this as a function with parameter = analog pin, flesh out program if needed
-pin = 0
+
+pin = 0 #this needs to be a set pin for this circuit
 import time 
 from pymata4 import pymata4
 board = pymata4.Pymata4()
