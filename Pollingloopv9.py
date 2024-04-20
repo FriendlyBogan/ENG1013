@@ -32,6 +32,11 @@ MAIN THINGS THAT I CHANGED:
 
 NAAILAH' Changes (19/04/2024):
 - changed the display_distance_to_nearest_vehicle to display the distance by the sensor and nor distanceCm
+- removed "pin = '1234' # set default pin
+    distanceCm = 0 # set default distance
+    polledData = []  # Initialize polledData here"
+from the main() function since these are already set at the tope of the code file
+    
 
 
 """
@@ -523,10 +528,6 @@ def main():
         Returns:
             Function has no returns. 
     """
-    pin = '1234' # set default pin
-    distanceCm = 0 # set default distance
-
-    polledData = []  # Initialize polledData here
     while True:
         pin, distanceCm = display_main_menu(pin, distanceCm)
 
