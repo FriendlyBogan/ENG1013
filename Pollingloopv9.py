@@ -56,6 +56,24 @@ FROM BRIEF:
 - Record working circuit video
 - Finally, remove extra things from the coding files and check coding standards
 - chcek graphs are appropriately formatted
+
+QUESTIONS/QUERIES (Nudara):
+- line 100 - does it work when there is a While sonar read is true? Because the sonar read doesn't give boolean? (also why is it in a function header format with the triple quotations)
+- line 110 - why is finalTime assigned as a variable if it is not used in the function? In line 115, another time.time is in substractione eqn
+- in the input_polling function, the correct notation should be square brackets for indexing a list not round brackets 
+- in line 110 - the code doesn't really check the stability for 3 seconds as we don't have a condition that states if time is 3 seconds & the final item in polledData is the same as the previous item then make it final distance. 
+(it is only specified in the comment) 
+- if finalDistance is a formal parameter of velocity function we need an argument when the velocity function is called
+- I understand that finalTime is a required parameter to the velocity function but it was defined within the input_polling function and hence is only available in the local space. 
+- In the display_main_menu function: is the distanceCm a parameter because in this function, the normal mode function is called and it has a parameteer distanceCm?
+- Likewise, the authorize_user function and display_data_observation_menu function are called with distanceCm and distanceCm & pin as the parameters respectively(but is it required)?
+- In the display_main_menu function: Why are there return statements within the conditional statements?? 
+- Is authorize_user function called with an argument for pin as the correct pin (why is distanceCm a parameter for this function - when it is not even used) & why does the function's return values(pin & distance) assigned to newPin, newDistance? 
+- polled_data is intialised in the normal_mode function but also at the very top of the code so??? (are both necessary?)
+- In normal_mode function for the line: polledData.append(get_sensor_data()) --> get_sensor_data is a print statement & it has no returns so why is it getting added to polledData (a list)?? --> the only thing added to that list will be 'None'. 
+- There is a display_maintenance_menu function but it is never called anywhere ! Only the authorize_user function is displayed? 
+- Polled_data is ALSO initialised in the main function (towards the bottom) ?? 
+
 """
 
 
@@ -508,7 +526,7 @@ def display_distance_to_nearest_vehicle(distance):
         Returns:
             Function has no returns
     """
-    print(f"The distance to the nearest vehicle is : {distance:.2f} cm") #or should I use round function: round(,2)??
+    print(f"The distance to the nearest vehicle is : {distanceCm:.2f} cm") 
 
 
 def traffic_operation_sequence(totalTime, distanceCm):
