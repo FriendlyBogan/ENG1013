@@ -1,4 +1,3 @@
-
 # Implement polling loop and related placeholders for Milestone 2 part 1
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
 # Created Date: 01/04/2024
@@ -30,6 +29,10 @@ MAIN THINGS THAT I CHANGED:
 - functions now have return values, such as input_polling() now returns both 'timeInLoop' and 'processData'.
 - authorize_user() now passes as 'authorization' as a paramter and returns the modified value.
 - display_maintenance_menu() initialises 'PIN' and 'distanceCm' with default values to avoid errors for later accessing in the function.
+
+NAAILAH' Changes (19/04/2024):
+- changed the display_distance_to_nearest_vehicle to display the distance by the sensor and nor distanceCm
+
 
 """
 
