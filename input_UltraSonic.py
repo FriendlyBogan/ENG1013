@@ -16,29 +16,24 @@ def ultraSonic(triggerPin,echoPin):
             #TODO: time within loop and timing on data appending 
             timeInLoop = time.time()
             ultrasonicData.append((board.sonar_read(triggerPin)[0])) #only appending the distance
-            time.sleep(1) #trial error indicates that the time to append data at 1Hz is better than the slower ones. 
+            time.sleep(0.25) #trial error indicates that the time to append data at 1Hz is better than the slower ones. 
             timeElapsed = timeInLoop - t0
-            if 1 <timeElapsed <= 3:
+            if 0.5 <timeElapsed <= 1.5:
                 intialDistance = int(ultrasonicData[1])/100
             if len(ultrasonicData) > 7: #assuming the data needed for the graphing is at 7 index long, able to change 
                 ultrasonicData.pop(0)
-            if  timeElapsed >= 10:
+            if  timeElapsed >= 5:
                 finalDistance = int(ultrasonicData[6])/100
-            try:
-                if intialDistance != '' and finalDistance != '':
+            if intialDistance != '' and finalDistance != '':
                     speed = math.floor((intialDistance - finalDistance) / timeElapsed,3)
                     if speed > 0.0210: #trial but please experiment this aswell 
                         print("CAR IS SPEEDING")
                         speedingAlarm = True
-                    quit()
-            except ValueError:
-                InvalidInput = input("invalid distance try again? (Y/N)")
-                if InvalidInput == "Y":
-                    print("restarting loop")
-                    continue
-                if InvalidInput == "N":
-                    print('exiting loop')
-                    quit()
+                        break
+                    else:
+                        break
+            else:
+                break
     except KeyboardInterrupt:
         print("user interruption")
         quit()
