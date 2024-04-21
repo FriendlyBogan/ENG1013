@@ -75,6 +75,28 @@ QUESTIONS/QUERIES (Nudara):
 - Polled_data is ALSO initialised in the main function (towards the bottom) ?? 
 
 """
+"""
+Some Answers to questions above (Cooper)
+Input functions:
+1."what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm"
+- for this i will add a function within my loop to use the user defined parameters as the maximum distance detection(i dont know the actual parameter we're changing)
+so this will do for now as the user defined parameter. 
+2. See how to integrate ultrasonic sensor function and normal_mode() since they both have loops. Also make the distance to nearest vehicle work.
+- The integration i had a couple ideas, that is inplementing the input within the normmal loop like you said, but have a condition that triggers the input loop to run. 
+- the distance to nearest vehicle can be done just by implementing a code in the output function that calls for the distancedata within the input loop then it would be fine
+3. - ped_presence (check spelling) should be imported from the input_pedPresence file? how to integrate in the normal mode? Ensure the number of presses displayed at stage 3
+- the input_pedPresense IS the working one. but i overlooked that this needs to be runned at all times with the loop. so i changed it to just a file and we can put that somewhere in the control loop
+4. The time between polling cycles (time between each cycle of ‘sensor polling’) is between 1 and 5 seconds, Have we included this?
+- i completely overlooked this. I changed the input_Ultrasonic into a 5 seconds loop. 
+5. - average_velocity() why are there two of them? 
+- all the old input functions are not working. so do not worry about it. only look at input_xxx for the working file
+6. Nudara's questions, all the input functions in  this file does not work. Look at the other files labeled input_xxx for the new working files.
+
+Questions
+1. How are we doing the pooling loop for hte normal mode? like maybe a input loop within the normal mode and the LEDs run indepedantly? 
+2. Arduino pin allocations, might need to split people up into groups for the meeting. some do the circuit some do the programming. 
+
+"""
 
 
 def ped_presense(pedestrianPresses):
