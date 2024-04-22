@@ -23,13 +23,33 @@ pedestrianPresses = 0 #set the following to zero as input subsystem not included
 distance = 0
 
 """
+ANSWERS TO NUDARA'S QUESTIONS (kristian):
+- In the display_main_menu function: Why are there return statements within the conditional statements?? 
+    These return statements ensure that the pin and distanceCm values are correctly updated based on the user's choices and 
+    can be used in subsequent iterations or parts of the program.
 
-MAIN THINGS THAT I CHANGED:
-- ped_presence() now takes 'pedestrianPresses' as a paramter instead of being accessed globally.
-- input_poling() and display_data_observation() accept data as paramters now.
-- functions now have return values, such as input_polling() now returns both 'timeInLoop' and 'processData'.
-- authorize_user() now passes as 'authorization' as a paramter and returns the modified value.
-- display_maintenance_menu() initialises 'PIN' and 'distanceCm' with default values to avoid errors for later accessing in the function.
+- Polled_data is ALSO initialised in the main function (towards the bottom) ?? 
+    polled_data is what i put when I was changing the code last week to remove global variables but it is certainly not needed. 
+    I think I just added it there for extra confirmation of an initialized varibale becuase I wasn't 100% sure as to what it 
+    did for the normal_mode()
+
+- polled_data is intialised in the normal_mode function but also at the very top of the code so??? (are both necessary?)
+    No, both are not necessary because once it is initialized at the top of the code it is set as [ ] 
+    until otherwise later in the code changed, whether it be locally changed or globally changed. I am not too sure why it is 
+    here though.
+
+- In the display_main_menu function: is the distanceCm a parameter because in this function, the normal mode function 
+is called and it has a parameteer distanceCm?
+    Im pretty sure I did this, when I was playing around with the code I remember changing this so that the data would 
+    actually be stored and passed down the code. By defining distanceCm as return values, the function can provide output 
+    or results back to the caller.
+
+- Likewise, the authorize_user function and display_data_observation_menu function are called with distanceCm and distanceCm 
+& pin as the parameters respectively(but is it required)?
+    yes, when you remove the paramters and return values from display_data_observationn_menu then the values of the 
+    newPin and the distance within the data observation menu do not get stored, hence why required. I tried playing around with 
+    it and i remember now that is the reason why i had to make them paramters within the function (I didn't know how else to do 
+    it).
 
 SOME NOTES FOR NEXT MEETING: (Naailah)
 - what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm
@@ -74,8 +94,6 @@ QUESTIONS/QUERIES (Nudara):
 - There is a display_maintenance_menu function but it is never called anywhere ! Only the authorize_user function is displayed? 
 - Polled_data is ALSO initialised in the main function (towards the bottom) ?? 
 
-"""
-"""
 Some Answers to questions above (Cooper)
 Input functions:
 1."what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm"
@@ -249,7 +267,6 @@ def normal_mode(distanceCm):
             Function has no returns
     """
     totalTime = 0
-    polledData = []  # Initialize polledData here
     while True:
         try:
             start = time.time()
@@ -591,7 +608,6 @@ def main():
     pin = '1234' # set default pin
     distanceCm = 0 # set default distance
 
-    polledData = []  # Initialize polledData here
     while True:
         pin, distanceCm = display_main_menu(pin, distanceCm)
 
