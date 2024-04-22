@@ -96,6 +96,8 @@ Questions
 1. How are we doing the pooling loop for hte normal mode? like maybe a input loop within the normal mode and the LEDs run indepedantly? 
 2. Arduino pin allocations, might need to split people up into groups for the meeting. some do the circuit some do the programming. 
 
+QUESTIONS -Devni
+-Do we not store the data in pairs (eg: distance, timestamp)?
 """
 
 
