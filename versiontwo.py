@@ -254,7 +254,7 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     if stage in ['one', 'two', 'three']:
         while end2 - start < 3:
             pedestrianPresses = pedPresence(8,board,pedestrianPresses)
-            time.sleep(0.2)
+            time.sleep(0.2) #CHECK WHATS THE BEST TIMING
             end2 = time.time()
     else:
         time.sleep(abs(3-(difference))) #1 or 1.5 are other possible time lengths 
