@@ -23,6 +23,10 @@ pedestrianPresses = 0 #set the following to zero as input subsystem not included
 distance = 0
 
 """
+KRISTIAN'S ADDITIONS (24/04):
+- Added time.sleep to some print statements so user can read before it sends them back to a menu. Also added more handling for
+    the userParameters so that it actually is able to tell whether the user profile is stored in the dictionary or not.
+
 ANSWERS TO NUDARA'S QUESTIONS (kristian):
 - In the display_main_menu function: Why are there return statements within the conditional statements?? 
     These return statements ensure that the pin and distanceCm values are correctly updated based on the user's choices and 
@@ -257,10 +261,21 @@ def authorize_user(username, userParameters):
                 }
                 break
         elif decision == 'N':
-            print("Error: User not found.")
-            display_main_menu(username, userParameters)
+            subsequentProfile = input("Do you already have a profile (Y/N)? ")
+            subsequentProfile = subsequentProfile.upper()
+            if subsequentProfile == 'Y':
+                username = input("\nEnter your username: ")
+                if username not in userParameters:
+                    print("Error. User not found")
+                    time.sleep(1)
+                    display_main_menu(username, userParameters)
+                break
+            elif subsequentProfile == 'N':
+                print("Going back to main menu...")
+                time.sleep(1)
+                display_main_menu(username, userParameters)
         elif decision != 'Y' or 'N':
-            print("Please enter Y/N.")
+            print("Please enter Y or N.")
 
     #ask for PIN, 5 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
     for tries in range(5):
@@ -285,6 +300,7 @@ def normal_mode(username, userParameters):
     """
     if not userParameters:
         print("\nNo users found. \nPlease go to Maintenance Adjustment Mode to set user...")
+        time.sleep(2)
         return
     
     username = list(userParameters.keys())[0] # Get the user from the dictionary
@@ -450,16 +466,19 @@ def display_data_observation_menu(polledData, username, userParameters):
     if choice == 1:
         if polledData == []:
             print('Insuffiecient Data Available!')
+            time.sleep(1)
             display_data_observation_menu(polledData, username, userParameters)
         else:
             print('Graph is printed')
             display_data_observation_menu(polledData, username, userParameters)
     elif choice == 2:
         peak_traffic_time(polledData)
+        time.sleep(1)
         display_data_observation_menu(polledData, username, userParameters)
     elif choice == 3:
         average_velocity()
         print(f"The average velocity is: {average_velocity}")
+        time.sleep(1)
         display_data_observation_menu(polledData, username, userParameters)
     elif choice == 0:
         display_main_menu(username, userParameters)
