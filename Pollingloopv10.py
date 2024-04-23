@@ -664,9 +664,7 @@ def main():
         Returns:
             Function has no returns. 
     """
-    distanceCm = 0 # set default distance
     userParamters = {} # initialise user paramters dictionary
-    pin = '1234'
     username = 'default_user' # prevents unboundlocalerror
 
     while True:
