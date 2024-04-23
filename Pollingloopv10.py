@@ -250,7 +250,7 @@ def authorize_user(username, userParameters):
     while True:
         try:
             decision = input("\nDo you want to create a new user profile? (Y/N): ")
-            decision = decision.upper()
+            decision = decision.upper() # so if the user inputs Y or y, either way the input is accepted
             if decision == 'Y':
                 username = input("\nEnter your username: ")
                 if username not in userParameters:
@@ -263,7 +263,7 @@ def authorize_user(username, userParameters):
                     break
             elif decision == 'N':
                 subsequentProfile = input("Do you already have a profile (Y/N)? ")
-                subsequentProfile = subsequentProfile.upper()
+                subsequentProfile = subsequentProfile.upper() # so if the user inputs Y/y, N/n - either way the input is accepted
                 if subsequentProfile == 'Y':
                     username = input("\nEnter your username: ")
                     if username not in userParameters:
@@ -278,7 +278,7 @@ def authorize_user(username, userParameters):
             elif decision != 'Y' or 'N':
                 print("Please enter Y or N.")
         except KeyboardInterrupt:
-            print("\nGoing back to main menu...")
+            print("\nGoing back to main menu...") # handling for wanting to go back to main menu anywhere in the loop
             time.sleep(1)
             display_main_menu(username, userParameters)
 
@@ -304,8 +304,9 @@ def normal_mode(username, userParameters):
             Function has no returns
     """
     if not userParameters:
-        print("\nNo users found. \nPlease go to Maintenance Adjustment Mode to set user...")
-        time.sleep(2)
+        print("\nNo users found.")
+        print("Please go to Maintenance Adjustment Mode to set user...")
+        time.sleep(2) # creates user readability when print statements show.
         return
     
     username = list(userParameters.keys())[0] # Get the user from the dictionary
