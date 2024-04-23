@@ -248,34 +248,39 @@ def authorize_user(username, userParameters):
             Function returns userParameters
     """
     while True:
-        decision = input("\nDo you want to create a new user profile? (Y/N): ")
-        decision = decision.upper()
-        if decision == 'Y':
-            username = input("\nEnter your username: ")
-            if username not in userParameters:
-                print("\nCreating new user profile...")
-                pin = input("Set your PIN: ")
-                userParameters[username] = {
-                    'pin': pin,
-                    'distanceCm': 0
-                }
-                break
-        elif decision == 'N':
-            subsequentProfile = input("Do you already have a profile (Y/N)? ")
-            subsequentProfile = subsequentProfile.upper()
-            if subsequentProfile == 'Y':
+        try:
+            decision = input("\nDo you want to create a new user profile? (Y/N): ")
+            decision = decision.upper()
+            if decision == 'Y':
                 username = input("\nEnter your username: ")
                 if username not in userParameters:
-                    print("Error. User not found")
+                    print("\nCreating new user profile...")
+                    pin = input("Set your PIN: ")
+                    userParameters[username] = {
+                        'pin': pin,
+                        'distanceCm': 0
+                    }
+                    break
+            elif decision == 'N':
+                subsequentProfile = input("Do you already have a profile (Y/N)? ")
+                subsequentProfile = subsequentProfile.upper()
+                if subsequentProfile == 'Y':
+                    username = input("\nEnter your username: ")
+                    if username not in userParameters:
+                        print("Error. User not found")
+                        time.sleep(1)
+                        display_main_menu(username, userParameters)
+                    break
+                elif subsequentProfile == 'N':
+                    print("\nGoing back to main menu...")
                     time.sleep(1)
                     display_main_menu(username, userParameters)
-                break
-            elif subsequentProfile == 'N':
-                print("Going back to main menu...")
-                time.sleep(1)
-                display_main_menu(username, userParameters)
-        elif decision != 'Y' or 'N':
-            print("Please enter Y or N.")
+            elif decision != 'Y' or 'N':
+                print("Please enter Y or N.")
+        except KeyboardInterrupt:
+            print("\nGoing back to main menu...")
+            time.sleep(1)
+            display_main_menu(username, userParameters)
 
     #ask for PIN, 5 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
     for tries in range(5):
