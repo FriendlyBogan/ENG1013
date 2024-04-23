@@ -245,6 +245,7 @@ def authorize_user(username, userParameters):
     """
     while True:
         decision = input("\nDo you want to create a new user profile? (Y/N): ")
+        decision = decision.upper()
         if decision == 'Y':
             username = input("\nEnter your username: ")
             if username not in userParameters:
