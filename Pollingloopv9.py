@@ -350,8 +350,9 @@ def stage_one():
             Function has no returns
     """
 
-    pedestrianPresses = 0 #reset pedestrian presses value to zero in stage one 
+    pedCount = 0 #reset pedestrian presses value to zero in stage one 
     currentStage = 'Stage one'
+    pedPresense = False
     display_current_stage_traffic_operation(currentStage)
     #turn on the main road traffic lights --> green
     
@@ -391,6 +392,7 @@ def stage_three():
     """
     currentStage = 'Stage three'
     display_current_stage_traffic_operation(currentStage)
+    print(pedCount)
     #turn on the main road traffic lights --> red
     
     #turn on the side road traffic lights --> red
