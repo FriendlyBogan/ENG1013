@@ -238,10 +238,10 @@ def authorize_user(username, userParameters):
     """
     Used to authorize user to access the Maintenance Adjustment settings
         Parameters:
-            pin (str): PIN for authorization
-            distanceCm (str): distance in cm
+            username (key): stores username of profile.
+            userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
-            Function returns pin and distanceCm, which can be changed by user inputs
+            Function returns userParameters
     """
     while True:
         decision = input("\nDo you want to create a new user profile? (Y/N): ")
@@ -277,7 +277,8 @@ def normal_mode(username, userParameters):
     """
     Includes the polling loop and displays the distance from nearest vehicle, pedestrian presence and stages of operation.
         Parameters:
-            distanceCm (str): used to print the distance between vehicles
+            username (key): stores username of profile.
+            userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function has no returns
     """
@@ -327,10 +328,10 @@ def display_maintenance_menu(username, userParameters):
     """
     Displays menu for Maintenace Adjustment Mode.
         Parameters:
-            pin (str): for storing the values of the new pin
-            distanceCm (str): for storing the values of the new distance
+            username (key): stores username of profile.
+            userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
-            Function returns pin and distanceCm for storage and updated value purposes
+            Function returns userParameters
     """
     #function should show user what parameters can be changed (PIN and the distance - globals )
     username = list(userParameters.keys())[0]
@@ -421,6 +422,8 @@ def display_data_observation_menu(polledData, username, userParameters):
     Displays the Data Observation menu.
         Parameters:
             polledData (list): Conatins the data polled from sensors.
+            username (key): stores username of profile.
+            userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function has no returns
     """
@@ -436,7 +439,7 @@ def display_data_observation_menu(polledData, username, userParameters):
     while True:
         try:
             choice = int(input("Option: "))
-            if choice == 1 or choice == 2 or choice == 3 or choice==0:
+            if choice in [0, 1, 2, 3]:
                 break
             else:
                 print("Error: Invalid option")
@@ -446,15 +449,17 @@ def display_data_observation_menu(polledData, username, userParameters):
     if choice == 1:
         if polledData == []:
             print('Insuffiecient Data Available!')
-            return
+            display_data_observation_menu(polledData, username, userParameters)
         else:
             print('Graph is printed')
+            display_data_observation_menu(polledData, username, userParameters)
     elif choice == 2:
         peak_traffic_time(polledData)
-        
+        display_data_observation_menu(polledData, username, userParameters)
     elif choice == 3:
         average_velocity()
         print(f"The average velocity is: {average_velocity}")
+        display_data_observation_menu(polledData, username, userParameters)
     elif choice == 0:
         display_main_menu(username, userParameters)
 
