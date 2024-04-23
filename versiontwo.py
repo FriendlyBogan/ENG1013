@@ -253,7 +253,6 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     
     if stage in ['one', 'two', 'three']:
         while end2 - start < 3:
-            #pedestrianPresses = check_button(8, board, pedestrianPresses, add_pedcount)
             pedestrianPresses = pedPresence(8,board,pedestrianPresses)
             time.sleep(0.2)
             end2 = time.time()
