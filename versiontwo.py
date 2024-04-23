@@ -302,43 +302,6 @@ def display_maintenance_menu(pin, distanceCm):
     elif selection == 0:
         return pin, distanceCm
 
-
-def peak_traffic_time(polledData):
-    """
-    Used to detect the peak traffic time for past 24 hours. (yet to be implemented)
-        Parameters:
-            polledData (list): Conatins the data polled from sensors
-        Returns:
-            Function has no returns
-    """
-
-    #get past 24 times, put times in a dictionary and count the number at each time, highest = peak
-    verifyTwentyFourHoursAgo = time.time() - (3600 * 24)
-    #put it in a for loop to go through each polled data to see if its in the past 24h
-    twentyFourHoursTimestamps = []
-    for timestamps in polledData:
-        if timestamps >= verifyTwentyFourHoursAgo:
-            twentyFourHoursTimestamps.append(timestamps)
-    if twentyFourHoursTimestamps:
-        hour_count = {}
-        for hourTimestamps in twentyFourHoursTimestamps:
-            hours = time.localtime(hourTimestamps).tm_hour
-            hour_count[hour] + 1
-    
-        peak_times = []
-        max = 0
-        for hour, count in hour_count.items():
-            if count > max:
-                peak_times = count
-                max = count
-            elif count == max:
-                peak_times.append(count)
-            else:
-                pass
-        print (f"The peak traffic time(s) was {peak_times}")
-    else:
-        print("Insufficient data available!")
-
 def display_data_observation_menu(polledData):
     """
     Displays the Data Observation menu.
@@ -350,7 +313,7 @@ def display_data_observation_menu(polledData):
 
     print("\n=== Data Observation Mode ===\n")
     print("1: Display graph of traffic distance for the last 20 seconds for the last normal operation.")
-    print("2: Display the peak traffic time in the past 24 hours")
+    print("2: Display a message on the seven segment display")
     print("3: Display the average velocity of the vehicles for last 20 secs.")
     print("0. Return to main menu.\n")
 
@@ -373,7 +336,7 @@ def display_data_observation_menu(polledData):
             graphing(polledData)
             print('Graph is printed')
     elif choice == 2:
-        peak_traffic_time(polledData)
+        print('Please run the seven segment file to do so!')
     elif choice == 3:
         if len(polledData) < 7:
             print('Insuffiecient Data Available!')
