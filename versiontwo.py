@@ -184,12 +184,14 @@ def normal_mode(distanceCm,data_list, board):
         try:
             pedestrianPresses = 0
             stage_one()
+           
             start = 0 
             #stage one takes split seconds (must fully run before printing otherwise display insufficient data)
             start= time.time() 
             end = time.time()
             while end <  start +30: 
-                pedestrianPresses = polling_loop(board, polledData, 'one', pedestrianPresses)
+                # pedestrianPresses = polling_loop(board, polledData, 'one', pedestrianPresses)
+                polling_loop(board, polledData, 'one', pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -210,7 +212,7 @@ def normal_mode(distanceCm,data_list, board):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
             #stage three with print pedestrian count 
-            print('Number of Pedestrain Button Presses:',pedestrianPresses)
+            print('Number of Pedestrain Button Presses:',pedestrianPresses-1)
 
             stage_four()
             start = 0 
@@ -240,17 +242,20 @@ def normal_mode(distanceCm,data_list, board):
         except KeyboardInterrupt:
             print('\nReturning to main menu...')
             return polledData
-    
+
+
 def polling_loop(board, polledData, stage, pedestrianPresses): 
     start = time.time()
     polledData = ultraSonic(2, 3,board, polledData)
     end = time.time()
     difference = end-start
     end2 = time.time()
+    
     if stage in ['one', 'two', 'three']:
         while end2 - start < 3:
+            #pedestrianPresses = check_button(8, board, pedestrianPresses, add_pedcount)
             pedestrianPresses = pedPresence(8,board,pedestrianPresses)
-            time.sleep(0.17)
+            time.sleep(0.2)
             end2 = time.time()
     else:
         time.sleep(abs(3-(difference))) #1 or 1.5 are other possible time lengths 
