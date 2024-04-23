@@ -25,7 +25,6 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
 
     return ultrasonicData
 '''
-
 def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
 
     board.set_pin_mode_sonar(triggerPin, echoPin, timeout=20000)
@@ -41,11 +40,13 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
     timelist.append(round(vals[1],4))
     print(f'\n{ultrasonicData}')
     if (len(ultrasonicData))>2:
-        print(f'velocity = {round((ultrasonicData[-1]-ultrasonicData[-2])/(3),2)}cm/sec')
+        vel = round((ultrasonicData[-2]-ultrasonicData[-1])/(3),2)
+        print(f'velocity = {vel}cm/sec')
+        if vel> 10:
+            print('Vehicle speed is over 10cm/s!, Alarms sound')
     if len(ultrasonicData)>7:    
         ultrasonicData.pop(0)
 
     #TODO: time within loop and timing on data appending 
     return ultrasonicData
   
-            
