@@ -245,7 +245,7 @@ def normal_mode(distanceCm,data_list, board):
 
 
 def polling_loop(board, polledData, stage, pedestrianPresses): 
-    start = time.time()
+     start = time.time()
     polledData = ultraSonic(2, 3,board, polledData)
     end = time.time()
     difference = end-start
@@ -253,13 +253,16 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     
     if stage in ['one', 'two', 'three']:
         while end2 - start < 3:
+            #pedestrianPresses = check_button(8, board, pedestrianPresses, add_pedcount)
             pedestrianPresses = pedPresence(8,board,pedestrianPresses)
-            time.sleep(0.2) #CHECK WHATS THE BEST TIMING
+            time.sleep(0.2)
             end2 = time.time()
     else:
         time.sleep(abs(3-(difference))) #1 or 1.5 are other possible time lengths 
-
-    pollingTime = round(difference, 4)
+    
+    end3 = time.time()
+    difference2 = end3 - start
+    pollingTime = round(difference2, 2)
     print(f'Time Taken: {pollingTime} seconds')
     return pedestrianPresses
 
