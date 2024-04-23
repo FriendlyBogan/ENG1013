@@ -242,10 +242,11 @@ def normal_mode(distanceCm,data_list,timeForAverageVel, board):
 def polling_loop(board): 
     start = time.time()
     polledData = ultraSonic(2, 3,board, polledData)
-    print(polledData)
-    time.sleep(3-(difference)) #1 or 1.5 are other possible time lengths 
+    print(polledData)    
     end = time.time()
     difference = end-start
+    time.sleep(3-(difference)) #1 or 1.5 are other possible time lengths 
+
 
     pollingTime = round(difference, 4)
     print(f'Time Taken: {pollingTime} seconds')
