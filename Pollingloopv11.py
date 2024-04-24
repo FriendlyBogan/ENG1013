@@ -355,13 +355,13 @@ def normal_mode(data_list, board, username, userParameters):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
-                stage_Six()
-                start = 0
-                start = time.time()
-                while end < start + 3:
-                    polling_loop(board, polledData, 'six', pedestrianPresses)
-                    end = time.time*()
-                    display_distance_to_nearest_vehicle(int(start-end), polledData)
+            stage_six()
+            start = 0
+            start = time.time()
+            while end < start + 3:
+                polling_loop(board, polledData, 'six', pedestrianPresses)
+                end = time.time*()
+                display_distance_to_nearest_vehicle(int(start-end), polledData)
 
             polledData.append(get_sensor_data())
             current = time.time()
