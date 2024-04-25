@@ -345,10 +345,9 @@ def average_velocity(distances, time):
 #Output Subsytem begins here 
 #function to display the current stage of traffic operation occuring to console 
 
-def lights(stage):    
+def lights(stage,board):    
     from pymata4 import pymata4
     import time
-    board = pymata4.Pymata4()
     RCLK = 9;  #latchPIN
     SRCLK = 10; #clockPIN
     SER = 8 #data 
@@ -427,6 +426,9 @@ def lights(stage):
             board.digital_write(GND,0)
             time.sleep(0.5)
             board.digital_write(GND,1)
+        elif stage == 4:
+            board.digital_write(GND,1) #initialsing voltage to be ON 
+
 
     def LED8 (stat):
         board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
@@ -463,7 +465,7 @@ def stage_one():
  
     currentStage = '~~ STAGE ONE ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('StageOne')
+    lights('StageOne',board)
     #turn on the main road traffic lights --> green
     
     #turn on the side road traffic lights --> red
@@ -483,7 +485,7 @@ def stage_two():
     """
     currentStage = '~~ STAGE TWO ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('stageTwo')
+    lights('stageTwo',board)
     #turn on the main road traffic lights --> yellow
 
     #turn on the side road traffic lights --> red
@@ -503,7 +505,7 @@ def stage_three():
     """
     currentStage = '~~ STAGE THREE ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('stageThree')
+    lights('stageThree',board)
     #turn on the main road traffic lights --> red
     
     #turn on the side road traffic lights --> red
@@ -523,7 +525,7 @@ def stage_four():
     """
     currentStage = '~~ STAGE FOUR ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('stageFour')
+    lights('stageFour',board)
     #turn on the main road traffic lights --> red
 
     #turn on the side road traffic lights --> green
@@ -543,7 +545,7 @@ def stage_five():
     """
     currentStage = '~~ STAGE FIVE ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('stageFive')
+    lights('stageFive',board)
     #turn on the main road traffic lights --> red
     
     #turn on the side road traffic lights --> yellow 
@@ -563,7 +565,7 @@ def stage_six():
     """
     currentStage = '~~ STAGE SIX ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('StageSix')
+    lights('StageSix',board)
     #turn on the main road traffic lights --> red
     
     #turn on the side road traffic lights --> red
