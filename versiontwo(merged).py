@@ -31,77 +31,10 @@ MAIN THINGS THAT I CHANGED:
 - functions now have return values, such as input_polling() now returns both 'timeInLoop' and 'processData'.
 - authorize_user() now passes as 'authorization' as a paramter and returns the modified value.
 - display_maintenance_menu() initialises 'PIN' and 'distanceCm' with default values to avoid errors for later accessing in the function.
-
-SOME NOTES FOR NEXT MEETING: (Naailah)
-- what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm
-- See how to integrate ultrasonic sensor function and normal_mode() since they both have loops. Also make the distance to nearest vehicle work.
-- ENSURE traffic_operation_sequence(totalTime, sensor_distance) IS NOT DISRUPTED in the process of integrating the sensors
-- for the distance_to_nearest_vehicle, validate the data, if no data available, print relevant message
-- ped_presence (check spelling) should be imported from the input_pedPresence file? how to integrate in the normal mode? Ensure the number of presses displayed at stage 3
-- delete the get_sensor_data function (repetitive, no longer necesary?)
-- See if peak_traffic_time() is working, if not, better to remove it
-- average_velocity() why are there two of them?
-- See how graphs are going and how the data can be accessed for the graphs
-- display_current_stage_traffic_operation(stage) function is unecessary, we can directly print it under the stage functions (use the same ofrmat tho, it looks neat)
-- How to use call-back functions.
-- change pin to user_pin since can be confused with arduino pins
-- Global variables have been initialized twice, change that !!(changed in the branch)!!
-- Get atleast the normal mode working properly with LEDs
-- check with the branched polling loop which i made some changes to
-
-FROM BRIEF:
-- Probe points for current measurement? Use jumper pins not wires (there are guides on moodle)
-- see that there are appropriate print statements
-- The time between polling cycles (time between each cycle of ‘sensor polling’) is between 1 and 5 seconds, Have we included this?
-- DONT FORGET CIRCUIT DIAGRAMS FOR SUBMISSION!!
-- Record working circuit video
-- Finally, remove extra things from the coding files and check coding standards
-- chcek graphs are appropriately formatted
-
-QUESTIONS/QUERIES (Nudara):
-- line 100 - does it work when there is a While sonar read is true? Because the sonar read doesn't give boolean? (also why is it in a function header format with the triple quotations)
-- line 110 - why is finalTime assigned as a variable if it is not used in the function? In line 115, another time.time is in substractione eqn
-- in the input_polling function, the correct notation should be square brackets for indexing a list not round brackets 
-- in line 110 - the code doesn't really check the stability for 3 seconds as we don't have a condition that states if time is 3 seconds & the final item in polledData is the same as the previous item then make it final distance. 
-(it is only specified in the comment) 
-- if finalDistance is a formal parameter of velocity function we need an argument when the velocity function is called
-- I understand that finalTime is a required parameter to the velocity function but it was defined within the input_polling function and hence is only available in the local space. 
-- In the display_main_menu function: is the distanceCm a parameter because in this function, the normal mode function is called and it has a parameteer distanceCm?
-- Likewise, the authorize_user function and display_data_observation_menu function are called with distanceCm and distanceCm & pin as the parameters respectively(but is it required)?
-- In the display_main_menu function: Why are there return statements within the conditional statements?? 
-- Is authorize_user function called with an argument for pin as the correct pin (why is distanceCm a parameter for this function - when it is not even used) & why does the function's return values(pin & distance) assigned to newPin, newDistance? 
-- polled_data is intialised in the normal_mode function but also at the very top of the code so??? (are both necessary?)
-- In normal_mode function for the line: polledData.append(get_sensor_data()) --> get_sensor_data is a print statement & it has no returns so why is it getting added to polledData (a list)?? --> the only thing added to that list will be 'None'. 
-- There is a display_maintenance_menu function but it is never called anywhere ! Only the authorize_user function is displayed? 
-- Polled_data is ALSO initialised in the main function (towards the bottom) ?? 
-
-"""
-"""
-Some Answers to questions above (Cooper)
-Input functions:
-1."what is the "Distance" parameter that we are allowing the user to change (see maintenance adjustment)? This is there all over the file with the name distanceCm"
-- for this i will add a function within my loop to use the user defined parameters as the maximum distance detection(i dont know the actual parameter we're changing)
-so this will do for now as the user defined parameter. 
-2. See how to integrate ultrasonic sensor function and normal_mode() since they both have loops. Also make the distance to nearest vehicle work.
-- The integration i had a couple ideas, that is inplementing the input within the normmal loop like you said, but have a condition that triggers the input loop to run. 
-- the distance to nearest vehicle can be done just by implementing a code in the output function that calls for the distancedata within the input loop then it would be fine
-3. - ped_presence (check spelling) should be imported from the input_pedPresence file? how to integrate in the normal mode? Ensure the number of presses displayed at stage 3
-- the input_pedPresense IS the working one. but i overlooked that this needs to be runned at all times with the loop. so i changed it to just a file and we can put that somewhere in the control loop
-4. The time between polling cycles (time between each cycle of ‘sensor polling’) is between 1 and 5 seconds, Have we included this?
-- i completely overlooked this. I changed the input_Ultrasonic into a 5 seconds loop. 
-5. - average_velocity() why are there two of them? 
-- all the old input functions are not working. so do not worry about it. only look at input_xxx for the working file
-6. Nudara's questions, all the input functions in  this file does not work. Look at the other files labeled input_xxx for the new working files.
-
-Questions
-1. How are we doing the pooling loop for hte normal mode? like maybe a input loop within the normal mode and the LEDs run indepedantly? 
-2. Arduino pin allocations, might need to split people up into groups for the meeting. some do the circuit some do the programming. 
-
-QUESTIONS -Devni
--Do we not store the data in pairs (eg: distance, timestamp)?
 """
 
-def display_main_menu(username, userParameters, polledData, board, authorization):
+
+def display_main_menu(userName, userParameters, polledData, board, authorization):
     """
     Used to display the main menu.
         Parameters:
@@ -132,9 +65,9 @@ def display_main_menu(username, userParameters, polledData, board, authorization
 
     # Process choice
     if choice == 1:
-        polledData = normal_mode(username, userParameters, polledData, board)
+        polledData = normal_mode(userName, userParameters, polledData, board)
     elif choice == 2:
-        userParameters, authorization = authorize_user(username, userParameters, authorization)
+        userParameters, authorization = authorize_user(userName, userParameters, authorization)
     elif choice == 3:
         display_data_observation_menu(polledData, board)
     elif choice == 0:
@@ -142,28 +75,29 @@ def display_main_menu(username, userParameters, polledData, board, authorization
         board.shutdown()
         quit()
 
-    return username, userParameters, polledData, authorization
+    return userName, userParameters, polledData, authorization
 
-def authorize_user(username, userParameters, authorization):
-    """
+def authorize_user(userName, userParameters, authorization):
+    '''
     Used to authorize user to access the Maintenance Adjustment settings
         Parameters:
-            username (key): stores username of profile.
+            userName (key): stores userName of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function returns userParameters
-    """
+    '''
+
     if authorization == 'Allowed':
         while True:
             try:
                 decision = input("\nDo you want to create a new user profile? (Y/N): ")
                 decision = decision.upper() # so if the user inputs Y or y, either way the input is accepted
                 if decision == 'Y':
-                    username = input("\nEnter your username: ")
-                    if username not in userParameters:
+                    userName = input("\nEnter your userName: ")
+                    if userName not in userParameters:
                         print("\nCreating new user profile...")
                         pin = input("Set your PIN: ")
-                        userParameters[username] = {
+                        userParameters[userName] = {
                             'pin': pin,
                             'distanceCm': 0
                         }
@@ -175,8 +109,8 @@ def authorize_user(username, userParameters, authorization):
                     subsequentProfile = input("Do you already have a profile (Y/N)? ")
                     subsequentProfile = subsequentProfile.upper() # so if the user inputs Y/y, N/n - either way the input is accepted
                     if subsequentProfile == 'Y':
-                        username = input("\nEnter your username: ")
-                        if username not in userParameters:
+                        userName = input("\nEnter your userName: ")
+                        if userName not in userParameters:
                             print("Error. User not found")
                             time.sleep(1)
                         else:
@@ -197,9 +131,9 @@ def authorize_user(username, userParameters, authorization):
         #ask for PIN, 5 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
         for tries in range(5):
             userPin = input('\nEnter PIN: ')
-            if userPin == userParameters[username]['pin']:
+            if userPin == userParameters[userName]['pin']:
                 print("PIN accepted.")
-                return display_maintenance_menu(username, userParameters, authorization)
+                return display_maintenance_menu(userName, userParameters, authorization)
             else:
                 print('Incorrect PIN!')
         print("\n == You've exceeded the number of tries available and have been locked out == \nReturning to the main menu..." )
@@ -211,11 +145,11 @@ def authorize_user(username, userParameters, authorization):
         return userParameters, authorization
 
 
-def normal_mode(username, userParameters, data_list, board):
+def normal_mode(userName, userParameters, dataList, board):
     """
     Includes the polling loop and displays the distance from nearest vehicle, pedestrian presence and stages of operation.
         Parameters:
-            username (key): stores username of profile.
+            userName (key): stores userName of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function has no returns
@@ -224,11 +158,11 @@ def normal_mode(username, userParameters, data_list, board):
         print("\nNo users found.")
         print("Please go to Maintenance Adjustment Mode to set user...")
         time.sleep(2) # creates user readability when print statements show.
-        return data_list
+        return dataList
     
-    username = list(userParameters.keys())[0] # Get the user from the dictionary
+    userName = list(userParameters.keys())[0] # Get the user from the dictionary
 
-    polledData = data_list  # Initialize polledData here (check notes)
+    polledData = dataList  # Initialize polledData here (check notes)
     
  
     board.set_pin_mode_sonar(2,3,timeout=150000)
@@ -318,17 +252,17 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     print(f'Time Taken: {pollingTime} seconds')
     return pedestrianPresses, polledData
 
-def display_maintenance_menu(username, userParameters, authorization):
+def display_maintenance_menu(userName, userParameters, authorization):
     """
     Displays menu for Maintenace Adjustment Mode.
         Parameters:
-            username (key): stores username of profile.
+            userName (key): stores userName of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function returns userParameters
     """
     #function should show user what parameters can be changed (PIN and the distance - globals )
-    username = list(userParameters.keys())[0]
+    userName = list(userParameters.keys())[0]
     print ("\n=== Maintenence Adjustment Menu ===\n")
     print("1: Change PIN")
     print("2: View/update distance (range) in cm")
@@ -349,12 +283,12 @@ def display_maintenance_menu(username, userParameters, authorization):
         #since this function is already inside authorize_user, we dont need to authorize user again
         newPin = input("Enter new PIN: ")
         print ("PIN changed!")
-        userParameters[username]['pin'] = newPin
+        userParameters[userName]['pin'] = newPin
     elif selection == 2:
-        print(f"Current distance is {userParameters[username]['distanceCm']} cm")
+        print(f"Current distance is {userParameters[userName]['distanceCm']} cm")
         newDistance = int(input("Enter new distance: "))
         print('Distance changed!')
-        userParameters[username]['distanceCm'] = newDistance
+        userParameters[userName]['distanceCm'] = newDistance
     elif selection == 0:
         print('\nBack to main menu...')
 
@@ -365,7 +299,7 @@ def display_data_observation_menu(polledData, board):
     Displays the Data Observation menu.
         Parameters:
             polledData (list): Conatins the data polled from sensors.
-            username (key): stores username of profile.
+            userName (key): stores userName of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
         Returns:
             Function has no returns
@@ -410,6 +344,103 @@ def average_velocity(distances, time):
 
 #Output Subsytem begins here 
 #function to display the current stage of traffic operation occuring to console 
+
+def lights(stage):    
+    from pymata4 import pymata4
+    import time
+    board = pymata4.Pymata4()
+    RCLK = 9;  #latchPIN
+    SRCLK = 10; #clockPIN
+    SER = 8 #data 
+    GND = 11; #GNDPin
+
+    if stage == 'stageOne':
+        ON = "10000101"[::-1]
+    if stage == 'stageTwo':
+        ON = "01000101"[::-1]
+    if stage == 'stageThree':
+        ON = "00100101"[::-1]
+    if stage == 'stageFour':
+        ON = "00110010"[::-1]
+    if stage == 'stageFive':
+        ON = "00101010"[::-1]
+    if stage == 'stageSix':
+        ON = "00100101"[::-1]
+    
+
+    OnList = [char for char in ON] #seperate each bit as an element and store it within a list 
+
+    #setting up pin 
+    board.set_pin_mode_digital_output(RCLK)
+    board.set_pin_mode_digital_output(SRCLK)
+    board.set_pin_mode_digital_output(SER)
+    board.set_pin_mode_digital_output(GND) #this will only be used for led7 during stage 5
+
+
+    #function to turn on each LEDs
+    def LED1 (stat):
+        board.digital_write(RCLK,0)
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+    def LED2 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+    def LED3 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+    def LED4 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+
+    def LED5 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+
+    def LED6 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+
+    def LED7 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+        if stage == 'stageFive':
+            board.digital_write(GND,0)
+            time.sleep(0.5)
+            board.digital_write(GND,1)
+            time.sleep(0.5)
+            board.digital_write(GND,0)
+            time.sleep(0.5)
+            board.digital_write(GND,1)
+            time.sleep(0.5)
+            board.digital_write(GND,0)
+            time.sleep(0.5)
+            board.digital_write(GND,1)
+
+    def LED8 (stat):
+        board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
+        board.digital_write(SRCLK,1)
+        board.digital_write(SRCLK,0)
+        board.digital_write(RCLK,1)
+        board.digital_write(RCLK,0)
+    
+    #Looping thru each LED functions with its own bit of information for that stage 
+    ledList = [LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8]
+    for ledFunc, digit in zip(ledList, OnList): #zip is used here so that both list can iterate at the same time
+        digit = int(digit)
+        ledFunc(digit)
+
 def display_current_stage_traffic_operation(stage):
     """
     Displays the current traffic operation stage.
@@ -556,13 +587,13 @@ def main():
             Function has no returns. 
     """
     userParameters = {} # initialise user paramters dictionary
-    username = 'default_user' # prevents unboundlocalerror
+    userName = 'default_user' # prevents unboundlocalerror
     polledData = []  #is this needed? RESETS FOR EVERY NORMAL OPERATRION RUN
     authorization = 'Allowed'
     board = pymata4.Pymata4()
 
     while True:
-        username, userParameters, polledData, authorization = display_main_menu(username, userParameters, polledData, board, authorization)
+        userName, userParameters, polledData, authorization = display_main_menu(userName, userParameters, polledData, board, authorization)
 
 if __name__ == '__main__':
     main()
