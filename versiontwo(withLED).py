@@ -4,8 +4,8 @@
 # version: 12.0
 
 import time
-from input_UltraSonic import ultraSonic
 from pymata4 import pymata4
+from input_ultraSonic import ultraSonic
 from graphing import graphing
 from pedpress import pedPresence
 from sevensegfinal import start_seven_seg
@@ -155,7 +155,7 @@ def normal_mode(username, userParameters, dataList, board):
         try:
             pedestrianPresses = 0
 
-            stage_one()
+            stage_one(board)
             start = 0 
             start= time.time() 
             end = time.time()
@@ -164,7 +164,7 @@ def normal_mode(username, userParameters, dataList, board):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
-            stage_two() 
+            stage_two(board) 
             start = 0 
             start = time.time()
             while end < start + 3: 
@@ -172,7 +172,7 @@ def normal_mode(username, userParameters, dataList, board):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
-            stage_three()
+            stage_three(board)
             start = 0 
             start = time.time()
             while end < start + 3:
@@ -182,7 +182,7 @@ def normal_mode(username, userParameters, dataList, board):
             #stage three with print pedestrian count 
             print('Number of Pedestrain Button Presses:',pedestrianPresses-1)
 
-            stage_four()
+            stage_four(board)
             start = 0 
             start = time.time()
             while end < start + 30:
@@ -190,7 +190,7 @@ def normal_mode(username, userParameters, dataList, board):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
-            stage_five()
+            stage_five(board)
             start = 0 
             start = time.time()
             while end < start + 3:
@@ -198,7 +198,7 @@ def normal_mode(username, userParameters, dataList, board):
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
-            stage_six()
+            stage_six(board)
             start = 0 
             start = time.time()
             while end < start + 3:
@@ -224,7 +224,7 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
             Function returns updated pedestrianPresses and polledData
     """
     start = time.time()
-    polledData = ultraSonic(2, 3,board, polledData)
+    polledData = ultraSonic(12, 13,board, polledData)
     end = time.time()
     difference = end-start
     end2 = time.time()
@@ -427,9 +427,10 @@ def lights(stage,board):
             board.digital_write(GND,0)
             time.sleep(0.5)
             board.digital_write(GND,1)
-        elif stage == 4:
+        elif stage == 'stageFour':
             board.digital_write(GND,1) #initialsing voltage to be ON 
-
+        else:
+            board.digital_write(GND,0) #turning it off   
 
     def LED8 (stat):
         board.digital_write(SER,stat) #if ser is 0 is on, 1 is off 
@@ -454,18 +455,18 @@ def display_current_stage_traffic_operation(stage):
     """
     print(f"\nThe current stage of traffic is: {stage}")
     
-def stage_one(): 
+def stage_one(board): 
     """
     Used to control stage one operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
  
     currentStage = '~~ STAGE ONE ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('StageOne',board)
+    lights('stageOne',board)
 
     #turn on the main road traffic lights --> green
     
@@ -476,11 +477,11 @@ def stage_one():
     print("\nStage one: Main Road Traffic Lights turn green, Side Road Traffic Lights turn red, Pedestrian Lights turn red")
     
 
-def stage_two(): 
+def stage_two(board): 
     """
      Used to control stage two operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
@@ -497,11 +498,11 @@ def stage_two():
     print("\nStage two: Main Road Traffic Lights turn yellow, Side Road Traffic Lights turn red, Pedestrian Lights turn red")
 
  
-def stage_three(): 
+def stage_three(board): 
     """
      Used to control stage three operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
@@ -518,11 +519,11 @@ def stage_three():
     print("\nStage three: Main Road Traffic Lights turn red, Side Road Traffic Lights turn red, Pedestrian Lights turn red")
 
 
-def stage_four(): 
+def stage_four(board): 
     """
     Used to control stage four operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
@@ -539,11 +540,11 @@ def stage_four():
     print("\nStage four: Main Road Traffic Lights turn red , Side Road Traffic Lights turn green, Pedestrian Lights turn green")
 
 
-def stage_five(): 
+def stage_five(board): 
     """
     Used to control stage five operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
@@ -557,20 +558,20 @@ def stage_five():
     
     #turn on the pedestrian lights --> flashing green at 2-3 Hz 
     
-    print("\nStage five: Main Road Traffic Lights turn red, Side Road Traffic Lights turn yellow, Pedestrian Lights turn flashing green at 2-3 Hz")  
+    print("\nStage five: Main Road Traffic Lights turn red, Side Road Traffic Lights turn yellow, Pedestrian Lights turn flashing green at 2 Hz")  
 
 
-def stage_six(): 
+def stage_six(board): 
     """
     Used to control stage six operations for LEDs.
         Parameters:
-            Function has no parameters
+            board: communication with arduino
         Returns:
             Function has no returns
     """
     currentStage = '~~ STAGE SIX ~~'
     display_current_stage_traffic_operation(currentStage)
-    lights('StageSix',board)
+    lights('stageSix',board)
 
     #turn on the main road traffic lights --> red
     

@@ -1,4 +1,4 @@
-# Function to read data from ultrasonic sensor
+# Contains function to read data from ultrasonic sensor
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
 # Created Date: 20/04/2024
 # version: 5.0
@@ -15,7 +15,7 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
         Returns:
             Function returns updated ultraSonicData
     '''
-    
+
     board.set_pin_mode_sonar(triggerPin, echoPin, timeout=20000)
     vals = board.sonar_read(triggerPin)
 
@@ -29,6 +29,8 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
     
     if len(ultrasonicData)==8:    
         ultrasonicData.pop(0)
+
+    print(f'\nData from sensor: {ultrasonicData}')
 
     return ultrasonicData
   

@@ -1,4 +1,4 @@
-# Function to detect pedestrian presence
+# Contains function to detect pedestrian presence
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
 # Created Date: 20/04/2024
 # version: 2.0
@@ -19,7 +19,6 @@ def pedPresence(pin,board,pedcount):
         value = board.digital_read(pin)
         if value[0] == 0:
             pedcount += 1
-            print(pedcount)
         return pedcount
     except KeyboardInterrupt:
             board.shutdown()
