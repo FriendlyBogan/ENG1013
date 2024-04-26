@@ -100,7 +100,7 @@ lookUp = {
     '~': "1000000"
 }
 
-def write_all_digit(board, segPins,digPins, message,lookUpDict = lookUp):
+def write_all_digit(board, segPins,digPins, message,lookUp):
     '''
     Function to display message on the seven segment display
         Parameters:
@@ -108,32 +108,40 @@ def write_all_digit(board, segPins,digPins, message,lookUpDict = lookUp):
             segPins (list of integers): A list consisting of the pins from arduino controlling the seven segments
             digPins (list of integers): A list consisting of the pins from arduino controlling the 4 digits
             message (str): message to be displayed
-            lookUpDict (dict): consists of all characters that can be displayed and it corresponding binary values
+            lookUp (dict): consists of all characters that can be displayed and it corresponding binary values
         Returns:
             Function has no returns
     '''
 
     for pin in segPins:
-        board.set_pin_mode_digital_message(pin)
+        board.set_pin_mode_digital_output(pin)
 
     for dig in range(len(message)):
-        board.set_pin_mode_digital_message(digPins[dig])
+        board.set_pin_mode_digital_output(digPins[dig])
         board.digital_write(digPins[dig],1)
 
     while True:
         try:
             for dig in range(len(message)):
                 board.digital_write(digPins[dig],0)
-                for x in lookUpDict.keys():
+                for x in lookUp.keys():
                     if x == message[dig]:
                         for y in range(7):
-                            board.set_pin_mode_digital_message(segPins[y])
-                            board.digital_write(segPins[y],int(lookUpDict[x][y]))
+                            board.set_pin_mode_digital_output(segPins[y])
+                            board.digital_write(segPins[y],int(lookUp[x][y]))
                         for y in range(7):
                             board.digital_write(segPins[y],0)
                 board.digital_write(digPins[dig],1)
         except KeyboardInterrupt:
             break
+    
+def switching_off(board, segPins):
+    print("Clearing message....")
+            
+    for y in range(7):
+        board.digital_write(segPins[y],0)
+    time.sleep(3)
+
     
 def start_seven_seg():
     '''
@@ -181,6 +189,7 @@ def start_seven_seg():
 
         if rerun == 'Y':
             print("Clearing message...")
+            switching_off(board, segPins)
             time.sleep(3)
             continue
         elif rerun == 'N':
@@ -188,4 +197,3 @@ def start_seven_seg():
             print("Clearing message...")
             time.sleep(3)
             break
-  
