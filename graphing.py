@@ -20,7 +20,7 @@ def graphing(polledData):
 
     plt.plot(last20SecTimes, polledData)
 
-    plt.xlabel('Timestamps')
+    plt.xlabel('Timestamps (s)')
     plt.ylabel('Distances (cm)')
     plt.title("Polled data from the last 20 seconds")
     plt.show()
