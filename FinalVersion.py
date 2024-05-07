@@ -9,6 +9,7 @@ from input_ultraSonic import ultraSonic
 from graphing import graphing
 from pedpress import pedPresence
 from sevensegfinal import start_seven_seg
+from LDR import read_LDR
 
 
 def display_main_menu(username, userParameters, polledData, board, authorization):
@@ -159,8 +160,11 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start= time.time() 
             end = time.time()
-            while end <  start +30: 
-                pedestrianPresses, polledData = polling_loop(board, polledData, 'one', pedestrianPresses)
+            stage_time = 30
+            while end <  start + stage_time: 
+                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, 'one', pedestrianPresses)
+                if dayNightCycle == 'night':
+                    stage_time = 45
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -168,7 +172,7 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start = time.time()
             while end < start + 3: 
-                pedestrianPresses, polledData = polling_loop(board, polledData, 'two',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, 'two',pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -176,7 +180,7 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData  = polling_loop(board, polledData, 'three', pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'three', pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
             #stage three with print pedestrian count 
@@ -186,7 +190,7 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start = time.time()
             while end < start + 30:
-                pedestrianPresses, polledData  = polling_loop(board, polledData, 'four',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'four',pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -194,7 +198,7 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData  = polling_loop(board, polledData, 'five',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'five',pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -202,7 +206,7 @@ def normal_mode(username, userParameters, dataList, board):
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData  = polling_loop(board, polledData, 'six',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'six',pedestrianPresses)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -225,6 +229,7 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     """
     start = time.time()
     polledData = ultraSonic(12, 13,board, polledData)
+    cycle = read_LDR(0, board)
     end = time.time()
     difference = end-start
     end2 = time.time()
@@ -241,7 +246,7 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
     difference2 = end3 - start
     pollingTime = round(difference2, 2)
     print(f'Time Taken: {pollingTime} seconds')
-    return pedestrianPresses, polledData
+    return pedestrianPresses, polledData, cycle
 
 def display_maintenance_menu(username, userParameters, authorization):
     """
