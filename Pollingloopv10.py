@@ -291,7 +291,8 @@ def authorize_user(username, userParameters):
         else:
             print('Incorrect PIN!')
     print("\n == You've exceeded the number of tries available and have been locked out == \nReturning to the main menu..." )
-    
+    time.sleep(1)
+    display_main_menu(username, userParameters)
     return userParameters
 
 def normal_mode(username, userParameters):
