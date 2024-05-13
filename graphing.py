@@ -24,3 +24,4 @@ def graphing(polledData):
     plt.ylabel('Distances (cm)')
     plt.title("Polled data from the last 20 seconds")
     plt.show()
+    plt.savefig('Polled data graph.pdf')
