@@ -6,7 +6,7 @@
 from pymata4 import pymata4
 import time
 
-def ultraSonic(triggerPin,echoPin,board,ultrasonicData, sensorHeight):
+def ultraSonic(triggerPin,echoPin,board,ultrasonicData, predeterminedHeight):
     '''
     Function to read data from ultrasonic sensor
         Parameters:
@@ -14,28 +14,33 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData, sensorHeight):
             echoPin (int): pin on the arduino connected to the sensor's echo
             board: communication set-up with arduino
             ultrasonicData (list of integers): list of latest values (distances in cm) polled from the sensor
-            sensorHeight (float): height of the ultrasonic sensor from the sruface (cm)
+            predeterminedHeight (float): predetermined height of vehicle (cm)
         Returns:
             Function returns updated ultraSonicData
     '''
 
-    board.set_pin_mode_sonar(triggerPin, echoPin, timeout=20000)
+    board.set_pin_mode_sonar(triggerPin, echoPin, timeout=40000)
     vals = board.sonar_read(triggerPin)
 
    
-    adjustedDistance = sensorHeight - vals[0]
+    vehicleHeight = 28 - vals[0]
 
-    if adjustedDistance >= 0:
-        ultrasonicData.append(adjustedDistance)
+    if vehicleHeight >= 0:
+        if vehicleHeight > predeterminedHeight:
+            print("\n == ALERT: VEHICLE HEIGHT GREATER THAN PREDETERMINED HEIGHT ==")
+            time.sleep(0.5)
 
-        if len(ultrasonicData)==2:    
-            ultrasonicData.pop(0)
+        else:
+            ultrasonicData.append(vehicleHeight)
+
+    if len(ultrasonicData)==2:    
+        ultrasonicData.pop(0)
 
         print(f'\nHeight of vehicle: {ultrasonicData}')
 
-    else:
+    elif vehicleHeight < 0:
         print("\n == NEGATIVE VEHICLE HEIGHT DETECED. CHECK ULTRASONIC SENSOR HEIGHT ==")
-        time.sleep(1)
+        time.sleep(0.5)
 
     time.sleep(0.5)
 
@@ -44,13 +49,13 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData, sensorHeight):
 
 def main():
     board = pymata4.Pymata4()
-    sensorHeight2 = 28
+    predeterminedHeight = 12
     ultrasonicData2 = []
     triggerPin2 = 7
     echoPin2 = 8
 
     while True:
-        ultraSonic(triggerPin=triggerPin2, echoPin=echoPin2, board=board, ultrasonicData=ultrasonicData2, sensorHeight=sensorHeight2)
+        ultraSonic(triggerPin2, echoPin2, board, ultrasonicData2, predeterminedHeight)
 
 if __name__ == '__main__':
     main()
