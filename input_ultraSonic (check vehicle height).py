@@ -6,7 +6,7 @@
 from pymata4 import pymata4
 import time
 
-def ultraSonic(triggerPin,echoPin,board,ultrasonicData, predeterminedHeight):
+def ultra_sonic(triggerPin,echoPin,board,ultrasonicData, predeterminedHeight):
     '''
     Function to read data from ultrasonic sensor
         Parameters:
@@ -78,7 +78,7 @@ def main():
     echoPin2 = 8
 
     while True:
-        ultraSonic(triggerPin2, echoPin2, board, ultrasonicData2, predeterminedHeight)
+        ultra_sonic(triggerPin2, echoPin2, board, ultrasonicData2, predeterminedHeight)
 
 if __name__ == '__main__':
     main()
