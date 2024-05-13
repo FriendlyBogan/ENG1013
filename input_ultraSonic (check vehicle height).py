@@ -47,6 +47,29 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData, predeterminedHeight):
 
     return ultrasonicData
 
+#create a function for LEDS, use while loop to keep it flashing for 6s
+def flashing_leds(board):
+    redLED = 9 #change the pin number accordingly
+    yellowLED = 10
+    
+    flashingDuration = 6 
+
+    startTime = time.time()
+    endTime = startTime + flashingDuration
+
+    while time.time() < endTime: #keep flashing the lights for 6s
+        board.digital_write(redLED, 1) #just flash the red
+        board.digital_write(yellowLED, 0)
+        time.sleep(0.5)  
+
+        board.digital_write(redLED, 0)
+        board.digital_write(yellowLED, 1) #now yellow 
+        time.sleep(0.5)  
+
+    #turn off the lights when while loop is done
+    board.digital_write(redLED, 0)
+    board.digital_write(yellowLED, 0)
+
 def main():
     board = pymata4.Pymata4()
     predeterminedHeight = 12
