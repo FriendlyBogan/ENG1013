@@ -1,5 +1,6 @@
 from pymata4 import pymata4
 import time
+board = pymata4.Pymata4()
 
 def stage_four_buzzer_day(board):
     buzzer4Pin = 3  # Or any available PWM Pin
@@ -9,9 +10,9 @@ def stage_four_buzzer_day(board):
     startTime = time.time()
 
     while time.time() - startTime < stageFourDurationDay: 
-        board.digital_write(buzzer4Pin, 1)
+        board.pwm_write(buzzer4Pin, 150)
         time.sleep(0.5)  # on for 0.5s
-        board.digital_write(buzzer4Pin, 0)
+        board.pwm_write(buzzer4Pin, 0)
         time.sleep(0.5)  # off for 0.5s
 
 def stage_four_buzzer_night(board):
@@ -22,8 +23,9 @@ def stage_four_buzzer_night(board):
     startTime = time.time()
 
     while time.time() - startTime < stageFourDurationNight: 
-        board.digital_write(buzzer4Pin, 1)
+        board.pwm_write(buzzer4Pin, 150)
         time.sleep(0.5)  # on for 0.5s
-        board.digital_write(buzzer4Pin, 0)
+        board.pwm_write(buzzer4Pin, 0)
         time.sleep(0.5)  # off for 0.5s
+
 
