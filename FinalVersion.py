@@ -6,14 +6,15 @@
 import time
 from pymata4 import pymata4
 from input_ultraSonic import ultraSonic
-from graphing import graphing
+from graphing import graphing_distance, graphing_height, graphing_temperature
 from pedpress import pedPresence
-from SevenSegShiftRegis import userinput_sevenseg, display_sevenseg, sevenseg_pin_set_up, clear_display
+from SevenSegShiftRegis import userinput_sevenseg, sevenseg_pin_set_up, clear_display, display_sevenseg_inf
 from LDR import read_LDR
-from Stage 4 buzzer import stage_four_buzzer_day, stage_four_buzzer_night
+from ultrasonic_check_vehicle_height_LED import ultrasonic_height
+from thermistor import thermistor
 
 
-def display_main_menu(username, userParameters, polledData, board,blocked_time):
+def display_main_menu(username, userParameters, polledData, polledData2, thermistorList,predeterminedHeight, board,blocked_time):
     """
     Used to display the main menu.
         Parameters:
@@ -50,19 +51,19 @@ def display_main_menu(username, userParameters, polledData, board,blocked_time):
 
     # Process choice
     if choice == 1:
-        polledData = normal_mode(username, userParameters, polledData, board)
+        polledData, polledData2, thermistorList = normal_mode(username, userParameters, polledData, polledData2,thermistorList, predeterminedHeight, board)
     elif choice == 2:
-        userParameters, blocked_time = authorize_user(username, userParameters, blocked_time)
+        userParameters, blocked_time = authorize_user(username, userParameters, blocked_time, predeterminedHeight)
     elif choice == 3:
-        display_data_observation_menu(polledData)
+        display_data_observation_menu(polledData, polledData2, thermistorList)
     elif choice == 0:
         print("Shutting the system down...")
         board.shutdown()
         quit()
 
-    return username, userParameters, polledData, blocked_time
+    return username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, blocked_time
 
-def authorize_user(username, userParameters, blocked_time):
+def authorize_user(username, userParameters, blocked_time, predeterminedHeight):
     '''
     Used to authorize user to access the Maintenance Adjustment settings
         Parameters:
@@ -86,7 +87,7 @@ def authorize_user(username, userParameters, blocked_time):
                         pin = input("Set your PIN: ")
                         userParameters[username] = {
                             'pin': pin,
-                            'distanceCm': 0
+                            'predeterminedHeight': predeterminedHeight
                         }
                         print("Profile created successfully!")
                     else:
@@ -135,7 +136,7 @@ def authorize_user(username, userParameters, blocked_time):
         return userParameters, blocked_time
 
 
-def normal_mode(username, userParameters, dataList, board):
+def normal_mode(username, userParameters, dataList,dataList2,thermistorList, predeterminedHeight, board):
     """
     Includes the polling loop and displays the distance from nearest vehicle, pedestrian presence and stages of operation.
         Parameters:
@@ -149,99 +150,87 @@ def normal_mode(username, userParameters, dataList, board):
     if not userParameters:
         print("\nNo users found.")
         print("Please go to Maintenance Adjustment Mode to set user...")
-        time.sleep(2) # creates user readability when print statements show.
-        return dataList
+        return dataList, dataList2, thermistorList
     
     username = list(userParameters.keys())[0] # Get the user from the dictionary
+    predeterminedHeight = userParameters[username]["predeterminedHeight"]
     polledData = dataList  # Initialize polledData here (check notes)
-    board.set_pin_mode_sonar(2,3,timeout=150000)
+    polledData2 = dataList2
 
     #TODO: Adjust the sensor loop time depending on stage time
-    sevenseg_pin_set_up(board)
 
     while True:
         try:
             pedestrianPresses = 0
-
             stage_one(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start= time.time() 
             end = time.time()
             stage_time = 30
             while end <  start + stage_time: 
-                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, "STG1", pedestrianPresses, end - start)
-                #if time.time()-start>2 and time.time()-start<15:
-                    #display_sevenseg(board, dayNightCycle[0:4])
-                
-                #if dayNightCycle == 'night':
-                    #stage_time = 45
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle = polling_loop(board, polledData, polledData2, "STG1",pedestrianPresses, predeterminedHeight, thermistorList)
+                if dayNightCycle == 'night':
+                    stage_time = 45
+                if len(thermistorList) > 1 and thermistorList[-1] > 35:
+                    stage_time += 5
                 end = time.time()
                 #dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_two(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3: 
-                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, "STG2",pedestrianPresses, end - start)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle = polling_loop(board, polledData, polledData2, "STG2",pedestrianPresses, predeterminedHeight, thermistorList)
                 end = time.time()
                 print(end-start)
                 #dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_three(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG3", pedestrianPresses, end - start)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG3",pedestrianPresses, predeterminedHeight, thermistorList)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
             #stage three with print pedestrian count 
             print('Number of Pedestrain Button Presses:',pedestrianPresses-1) #FIX THE -1
 
             stage_four(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             stage_time = 30
             while end < start + stage_time:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG4",pedestrianPresses, end - start)
-                if time.time()-start>2 and time.time()-start<4:
-                    display_sevenseg(board, dayNightCycle[0:4])
-                    stage_four_buzzer_day()
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG4",pedestrianPresses, predeterminedHeight, thermistorList)
                 if dayNightCycle == 'night':
                     stage_time = 10
-                    stage_four_buzzer_night()
+                if len(thermistorList) > 1 and thermistorList[-1] > 35:
+                    stage_time += 5
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_five(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG5",pedestrianPresses, end - start)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG5",pedestrianPresses,predeterminedHeight, thermistorList)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_six(board)
-            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG6",pedestrianPresses, end - start)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG6",pedestrianPresses, predeterminedHeight, thermistorList)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             
         except KeyboardInterrupt:
-            clear_display(board)
             print('\nReturning to main menu...')
-            return polledData
+            return polledData, polledData2, thermistorList
 
 
-def polling_loop(board, polledData, stage, pedestrianPresses, timeInStage): 
+def polling_loop(board, polledData,polledData2, stage, pedestrianPresses, predeterminedHeight, thermistorList): 
     """
     Polls data from the sensors and checks the pedestrian button for pushes for stages 1-3
         Parameters:
@@ -255,39 +244,24 @@ def polling_loop(board, polledData, stage, pedestrianPresses, timeInStage):
 
     start = time.time()
     polledData = ultraSonic(12, 13,board, polledData)
+    polledData2 = ultrasonic_height(6,7,board, polledData2, predeterminedHeight)
+    thermistorList = thermistor(board, thermistorList)
     cycle = read_LDR(0, board)
     end2 = time.time()
-    print(end2 - start)
     
     if stage in ["STG1", "STG2", "STG3"]:
         while end2 - start < 3:
-            if timeInStage<2:
-                display_sevenseg(board, stage)
-            if timeInStage >2 and timeInStage<4:
-                display_sevenseg(board, cycle[0:4])
             pedestrianPresses = pedPresence(5,board,pedestrianPresses)
-            sleep_start = time.time()
-            while time.time() - sleep_start < 0.2:
-                if timeInStage<2:
-                    display_sevenseg(board, stage)
+            time.sleep(0.2)
             end2 = time.time()
     else:
-        if timeInStage<1:
-            display_sevenseg(board, stage)
-        if timeInStage>1 and timeInStage<4:
-            display_sevenseg(board, cycle[0:4])
-        while end2 - start < 3:
-            if timeInStage<2:
-                display_sevenseg(board, stage)
-            end2 = time.time()
-        #time.sleep(abs(3-(difference)))  
+        time.sleep(abs(3-(end2-start)))  
     
-    clear_display(board)
     end3 = time.time()
     difference2 = end3 - start
     pollingTime = round(difference2, 2)
     print(f'Time Taken: {pollingTime} seconds')
-    return pedestrianPresses, polledData, cycle
+    return pedestrianPresses, polledData,polledData2,thermistorList, cycle
 
 def display_maintenance_menu(username, userParameters, blocked_time):
     """
@@ -304,7 +278,7 @@ def display_maintenance_menu(username, userParameters, blocked_time):
     username = list(userParameters.keys())[0]
     print ("\n=== Maintenence Adjustment Menu ===\n")
     print("1: Change PIN")
-    print("2: View/update distance (range) in cm")
+    print("2: View/update predetermined vehicle height in cm")
     print("0: Return to main menu\n")
 
     selection = -1
@@ -333,21 +307,29 @@ def display_maintenance_menu(username, userParameters, blocked_time):
         print ("PIN changed!")
         userParameters[username]['pin'] = newPin
     elif selection == 2:
-        print(f"Current distance is {userParameters[username]['distanceCm']} cm")
-        newDistance = int(input("Enter new distance: "))
 
-        if time.time() - start > 60:
-            print("Connection Timed Out! Returning to main menu....")
-            return userParameters, blocked_time
+        while True:
+            print(f"\nCurrent height is {userParameters[username]['predeterminedHeight']} cm")
+            newDistance = int(input("Enter new height: "))
+
+            if time.time() - start > 60:
+                print("Connection Timed Out! Returning to main menu....")
+                return userParameters, blocked_time
+            
+            if newDistance < 10 or newDistance>23:
+                print("Please enter a height between 10-23 cm (inclusive)!")
+                pass
+            else:
+                break
         
-        print('Distance changed!')
-        userParameters[username]['distanceCm'] = newDistance
+        print('Height changed!')
+        userParameters[username]['predeterminedHeight'] = newDistance
     elif selection == 0:
         print('\nBack to main menu...')
 
     return userParameters, blocked_time
 
-def display_data_observation_menu(polledData):
+def display_data_observation_menu(polledData, polledData2, thermistorData):
     """
     Displays the Data Observation Mode menu.
         Parameters:
@@ -358,8 +340,10 @@ def display_data_observation_menu(polledData):
 
     print("\n=== Data Observation Mode ===\n")
     print("1: Display graph of traffic distance for the last 20 seconds for the last normal operation.")
-    print("2: Display a message on the seven segment display")
-    print("3: Display the average velocity of the vehicles for last 20 secs.")
+    print("2: Display graph of vehicle heights for the last 20 seconds for the last normal operation.")
+    print("3: Display graph of temperatures for the last 20 seconds for the last normal operation.")
+    print("4: Display a message on the seven segment display")
+    print("5: Display the average velocity of the vehicles for last 20 secs.")
     print("0. Return to main menu.\n")
 
     choice = -1 
@@ -378,11 +362,23 @@ def display_data_observation_menu(polledData):
         if len(polledData)<7:
             print('Insuffiecient Data Available!')
         else:
-            graphing(polledData)
+            graphing_distance(polledData)
             print('Graph is displayed')
     elif choice == 2:
-        start_seven_seg()
+        if len(polledData2)<7:
+            print('Insuffiecient Data Available!')
+        else:
+            graphing_height(polledData2)
+            print('Graph is displayed')
     elif choice == 3:
+        if len(thermistorData)<7:
+            print('Insuffiecient Data Available!')
+        else:
+            graphing_temperature(thermistorData)
+            print('Graph is displayed')
+    elif choice == 4:
+        userinput_sevenseg()
+    elif choice == 5:
         if len(polledData) < 7:
             print('Insuffiecient Data Available!')
         else:
@@ -667,11 +663,14 @@ def main():
     userParameters = {} # initialise user parameters dictionary
     username = 'default_user' # prevents unboundlocalerror
     polledData = [] #list which will be updated during normal operation
+    polledData2 = []
+    predeterminedHeight = 21
     board = pymata4.Pymata4() #set up arduino connection
     blocked_time = 0 #time used for authorization
+    thermistorList = []
 
     while True:
-        username, userParameters, polledData, blocked_time = display_main_menu(username, userParameters, polledData, board, blocked_time)
+        username, userParameters, polledData, polledData2, thermistorList, predeterminedHeight, blocked_time = display_main_menu(username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, board, blocked_time)
 
 if __name__ == '__main__':
     main()

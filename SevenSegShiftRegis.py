@@ -128,10 +128,10 @@ def single_digit(board, bin_string):
 
     time.sleep(0.00220)
 
-   
-
 
 def userinput_sevenseg():
+    board = pymata4.Pymata4()
+    sevenseg_pin_set_up(board)
     while True:
         try:
             print('--------------------------------------------------------------------------------')
@@ -151,7 +151,6 @@ def userinput_sevenseg():
     display_sevenseg_inf(board, message)
 
 
-
 def sevenseg_pin_set_up(board):
     #setting up pin 
     board.set_pin_mode_digital_output(RCLK)
@@ -163,7 +162,7 @@ def sevenseg_pin_set_up(board):
         board.set_pin_mode_digital_output(pin)
         board.digital_write(pin,1)
 
-
+'''
 def display_sevenseg(board, message):
    
 
@@ -182,8 +181,8 @@ def display_sevenseg(board, message):
         
     end = time.time()
     return (1/(end-start))
+'''
         
-
 
 def clear_display(board):
     for ch in '00000000':
@@ -195,7 +194,7 @@ def clear_display(board):
     board.digital_write(RCLK,0)
 
 
-def display_sevenseg_inf(board, message):
+def display_sevenseg_inf(board,message):
 
     digPins = [7,6,5,4]
     RCLK = 9;  #latchPIN
@@ -206,7 +205,7 @@ def display_sevenseg_inf(board, message):
     board.set_pin_mode_digital_output(RCLK)
     board.set_pin_mode_digital_output(SRCLK)
     board.set_pin_mode_digital_output(SER)
-
+    print('Click on CTRL + C to exit!')
 
     for pin in digPins:
         board.set_pin_mode_digital_output(pin)
@@ -224,7 +223,7 @@ def display_sevenseg_inf(board, message):
                     board.digital_write(digPins[dig],0)
                     for x in lookUp.keys():
                         if x == display_message[dig]:
-                            single_digit(board, lookUp[x], SER, SRCLK, RCLK)
+                            single_digit(board, lookUp[x])
 
                     board.digital_write(digPins[dig],1)
 
@@ -239,13 +238,4 @@ def display_sevenseg_inf(board, message):
                 board.digital_write(RCLK, 1)
                 board.digital_write(RCLK,0)
                 quit()
-
-'''
-board = pymata4.Pymata4()
-sevenseg_pin_set_up(board)
-while True:
-    display_sevenseg(board, 'HELL')
-
-userinput_sevenseg()
-'''
 
