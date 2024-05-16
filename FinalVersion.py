@@ -8,7 +8,7 @@ from pymata4 import pymata4
 from input_ultraSonic import ultraSonic
 from graphing import graphing
 from pedpress import pedPresence
-from sevensegfinal import start_seven_seg
+from SevenSegShiftRegis import userinput_sevenseg, display_sevenseg, sevenseg_pin_set_up, clear_display
 from LDR import read_LDR
 
 
@@ -156,75 +156,89 @@ def normal_mode(username, userParameters, dataList, board):
     board.set_pin_mode_sonar(2,3,timeout=150000)
 
     #TODO: Adjust the sensor loop time depending on stage time
+    sevenseg_pin_set_up(board)
 
     while True:
         try:
             pedestrianPresses = 0
 
             stage_one(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start= time.time() 
             end = time.time()
             stage_time = 30
             while end <  start + stage_time: 
-                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, 'one', pedestrianPresses)
-                if dayNightCycle == 'night':
-                    stage_time = 45
+                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, "STG1", pedestrianPresses, end - start)
+                #if time.time()-start>2 and time.time()-start<15:
+                    #display_sevenseg(board, dayNightCycle[0:4])
+                
+                #if dayNightCycle == 'night':
+                    #stage_time = 45
                 end = time.time()
-                dist_to_nearest_vehicle(int(start-end), polledData)
+                #dist_to_nearest_vehicle(int(start-end), polledData)
 
-            stage_two(board) 
+            stage_two(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3: 
-                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, 'two',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle = polling_loop(board, polledData, "STG2",pedestrianPresses, end - start)
                 end = time.time()
-                dist_to_nearest_vehicle(int(start-end), polledData)
+                print(end-start)
+                #dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_three(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'three', pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG3", pedestrianPresses, end - start)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
             #stage three with print pedestrian count 
-            print('Number of Pedestrain Button Presses:',pedestrianPresses-1)
+            print('Number of Pedestrain Button Presses:',pedestrianPresses-1) #FIX THE -1
 
             stage_four(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             stage_time = 30
             while end < start + stage_time:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'four',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG4",pedestrianPresses, end - start)
+                if time.time()-start>2 and time.time()-start<4:
+                    display_sevenseg(board, dayNightCycle[0:4])
                 if dayNightCycle == 'night':
                     stage_time = 10
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_five(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'five',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG5",pedestrianPresses, end - start)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_six(board)
+            print("Seven segment display refresh rate: ", round(display_sevenseg(board, '    '), 2) ,'Hz')
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, 'six',pedestrianPresses)
+                pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG6",pedestrianPresses, end - start)
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             
         except KeyboardInterrupt:
+            clear_display(board)
             print('\nReturning to main menu...')
             return polledData
 
 
-def polling_loop(board, polledData, stage, pedestrianPresses): 
+def polling_loop(board, polledData, stage, pedestrianPresses, timeInStage): 
     """
     Polls data from the sensors and checks the pedestrian button for pushes for stages 1-3
         Parameters:
@@ -235,21 +249,37 @@ def polling_loop(board, polledData, stage, pedestrianPresses):
         Returns:
             Function returns updated pedestrianPresses and polledData
     """
+
     start = time.time()
     polledData = ultraSonic(12, 13,board, polledData)
     cycle = read_LDR(0, board)
-    end = time.time()
-    difference = end-start
     end2 = time.time()
+    print(end2 - start)
     
-    if stage in ['one', 'two', 'three']:
+    if stage in ["STG1", "STG2", "STG3"]:
         while end2 - start < 3:
+            if timeInStage<2:
+                display_sevenseg(board, stage)
+            if timeInStage >2 and timeInStage<4:
+                display_sevenseg(board, cycle[0:4])
             pedestrianPresses = pedPresence(5,board,pedestrianPresses)
-            time.sleep(0.2)
+            sleep_start = time.time()
+            while time.time() - sleep_start < 0.2:
+                if timeInStage<2:
+                    display_sevenseg(board, stage)
             end2 = time.time()
     else:
-        time.sleep(abs(3-(difference)))  
+        if timeInStage<1:
+            display_sevenseg(board, stage)
+        if timeInStage>1 and timeInStage<4:
+            display_sevenseg(board, cycle[0:4])
+        while end2 - start < 3:
+            if timeInStage<2:
+                display_sevenseg(board, stage)
+            end2 = time.time()
+        #time.sleep(abs(3-(difference)))  
     
+    clear_display(board)
     end3 = time.time()
     difference2 = end3 - start
     pollingTime = round(difference2, 2)
@@ -292,7 +322,7 @@ def display_maintenance_menu(username, userParameters, blocked_time):
     if selection == 1:
         #since this function is already inside authorize_user, we dont need to authorize user again
         newPin = input("Enter new PIN: ")
-        
+
         if time.time() - start > 60:
             print("Connection Timed Out! Returning to main menu....")
             return userParameters, blocked_time
@@ -634,8 +664,7 @@ def main():
     userParameters = {} # initialise user parameters dictionary
     username = 'default_user' # prevents unboundlocalerror
     polledData = [] #list which will be updated during normal operation
-    #board = pymata4.Pymata4() #set up arduino connection
-    board = 0
+    board = pymata4.Pymata4() #set up arduino connection
     blocked_time = 0 #time used for authorization
 
     while True:
