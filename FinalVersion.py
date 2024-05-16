@@ -10,6 +10,7 @@ from graphing import graphing
 from pedpress import pedPresence
 from SevenSegShiftRegis import userinput_sevenseg, display_sevenseg, sevenseg_pin_set_up, clear_display
 from LDR import read_LDR
+from Stage 4 buzzer import stage_four_buzzer_day, stage_four_buzzer_night
 
 
 def display_main_menu(username, userParameters, polledData, board,blocked_time):
@@ -208,8 +209,10 @@ def normal_mode(username, userParameters, dataList, board):
                 pedestrianPresses, polledData, dayNightCycle  = polling_loop(board, polledData, "STG4",pedestrianPresses, end - start)
                 if time.time()-start>2 and time.time()-start<4:
                     display_sevenseg(board, dayNightCycle[0:4])
+                    stage_four_buzzer_day()
                 if dayNightCycle == 'night':
                     stage_time = 10
+                    stage_four_buzzer_night()
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
