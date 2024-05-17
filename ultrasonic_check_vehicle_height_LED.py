@@ -49,11 +49,11 @@ def flashing_leds(board):
     '''
     redPin = 3 #change the pin number accordingly
     greenPin = 4
-    bluePin = 5
+
 
     board.set_pin_mode_digital_output(redPin)
     board.set_pin_mode_digital_output(greenPin)
-    board.set_pin_mode_digital_output(bluePin)
+
     
     try:
         flashingDuration = 6 
@@ -64,20 +64,16 @@ def flashing_leds(board):
         while time.time() < endTime: #keep flashing the lights for 6s
             board.digital_write(redPin, 1) #just flash the red
             board.digital_write(greenPin, 0)
-            board.digital_write(bluePin, 0)
             time.sleep(0.5)  
 
             board.digital_write(redPin, 1)
             board.digital_write(greenPin, 1) #now yellow 
-            board.digital_write(bluePin, 0)
             time.sleep(0.5)  
 
         #turn off the lights when while loop is done
         board.digital_write(redPin, 0)
         board.digital_write(greenPin, 0)
-        board.digital_write(bluePin, 0)
+
     except:
         board.digital_write(redPin, 0) #just flash the red
         board.digital_write(greenPin, 0)
-        board.digital_write(bluePin, 0)
-
