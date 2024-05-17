@@ -261,7 +261,8 @@ def normal_mode(username, userParameters, dataList,dataList2,thermistorList, pre
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_five(board)
-            board.digital_write(9, 1) #for stage five buzzer
+            board.set_pin_mode_digital_output(16)
+            board.digital_write(16, 1) #for stage five buzzer
             start = 0 
             start = time.time()
             while end < start + 3:
@@ -271,7 +272,7 @@ def normal_mode(username, userParameters, dataList,dataList2,thermistorList, pre
                     return polledData, polledData2, thermistorList
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
-            board.digital_write(9, 0)
+            board.digital_write(16, 0)
 
             stage_six(board)
             start = 0 
