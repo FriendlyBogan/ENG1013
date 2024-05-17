@@ -505,7 +505,7 @@ def lights(stage,board):
     RCLK = 9;  #latchPIN
     SRCLK = 10; #clockPIN
     SER = 8 #data 
-    GND = 11; #GNDPin
+    GND = 5; #GNDPin
 
     if stage == 'stageOne':
         ON = "10000101"[::-1]
