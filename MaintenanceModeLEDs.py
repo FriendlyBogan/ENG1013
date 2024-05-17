@@ -3,7 +3,7 @@ from pymata4 import pymata4
 
 board = pymata4.Pymata4()  
 
-def lights(board):
+def maintenance_lights(RCLK, SRCLK, SER, board):
     """
     Function to control the functionality of the LEDs.
     Parameters:
@@ -11,9 +11,6 @@ def lights(board):
     Returns:
         None
     """
-    RCLK = 9  # latchPIN
-    SRCLK = 10  # clockPIN
-    SER = 8  # data
 
     # Setting up pins
     board.set_pin_mode_digital_output(RCLK)
@@ -58,7 +55,7 @@ def lights(board):
             board.digital_write(RCLK, 0)
 
             time.sleep(0.5)
-            
+
             
             board.digital_write(SER, 0)
 
@@ -95,7 +92,7 @@ def lights(board):
             board.shutdown()
 
 def main():
-    lights(board)  # Initialize LEDs
+    maintenance_lights(board)
 
 if __name__ == "__main__":
     main()
