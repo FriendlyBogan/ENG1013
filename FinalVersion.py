@@ -1,33 +1,40 @@
-# Complete code for Milestone 2
+# Complete code for Milestone 3
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
 # Created Date: 01/04/2024
-# version: 12.0
+# version: 18.0
 
 import time
 from pymata4 import pymata4
 from input_ultraSonic import ultraSonic
 from graphing import graphing_distance, graphing_height, graphing_temperature
-from pedpress import pedPresence
-from SevenSegShiftRegis import userinput_sevenseg, sevenseg_pin_set_up, clear_display, display_sevenseg_inf
+from pedpress import ped_presence
+from SevenSegShiftRegis import userinput_sevenseg
 from LDR import read_LDR
 from ultrasonic_check_vehicle_height_LED import ultrasonic_height
 from thermistor import thermistor
+from slideSwitchOn import slide_switch_on
 
 
-def display_main_menu(username, userParameters, polledData, polledData2, thermistorList,predeterminedHeight, board,blocked_time):
+def display_main_menu(username, userParameters, polledData, polledData2, thermistorList,predeterminedHeight, board,blockedTime):
     """
     Used to display the main menu.
         Parameters:
             username (str): username of user currently operating the system.
             userParameters (dict): contains a dictionary of stored user profiles.
             polledData (list of integers): list of latest values (distances in cm) polled from the sensor
+            polledData2 (list of integers): list of latest values (heights in cm) polled from the sensor
+            thermistorList (list of floats): list of latest values (temperatures in degree C) polled from thermistor
+            predeterminedHeight (int): height limit of vehicles
             board: communication set-up with arduino
-            authorization (str): determines whether user is allowed access to maintenance adjustment mode
+            blockedTime (int): time for which the user is blocked from maintenance mode
         Returns:
             username (str): username of user currently operating the system.
             userParameters (dict): contains a dictionary of stored user profiles.
             polledData (list): list of latest values (distances in cm) polled from the sensor
-            authorization (str): determines whether user is allowed access to maintenance adjustment mode
+            polledData2 (list of integers): list of latest values (heights in cm) polled from the sensor
+            thermistorList (list of floats): list of latest values (temperatures in degree C) polled from thermistor
+            predeterminedHeight (int): height limit of vehicles
+            blockedTime (int): time for which the user is blocked from maintenance mode
 
     """
     print("\n=== Main Menu ===\n")
@@ -53,7 +60,7 @@ def display_main_menu(username, userParameters, polledData, polledData2, thermis
     if choice == 1:
         polledData, polledData2, thermistorList = normal_mode(username, userParameters, polledData, polledData2,thermistorList, predeterminedHeight, board)
     elif choice == 2:
-        userParameters, blocked_time = authorize_user(username, userParameters, blocked_time, predeterminedHeight)
+        userParameters, blockedTime = authorize_user(username, userParameters, blockedTime, predeterminedHeight)
     elif choice == 3:
         display_data_observation_menu(polledData, polledData2, thermistorList)
     elif choice == 0:
@@ -61,20 +68,22 @@ def display_main_menu(username, userParameters, polledData, polledData2, thermis
         board.shutdown()
         quit()
 
-    return username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, blocked_time
+    return username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, blockedTime
 
-def authorize_user(username, userParameters, blocked_time, predeterminedHeight):
+def authorize_user(username, userParameters, blockedTime, predeterminedHeight):
     '''
     Used to authorize user to access the Maintenance Adjustment settings
         Parameters:
             username (str): stores username of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
             authorization (str): determines whether user is allowed access to maintenance adjustment mode
+            blockedTime (int): time for which the user is blocked from maintenance mode
+            predeterminedHeight (int): height limit of vehicles
         Returns:
-            Function returns updated userParameters and authorization
+            Function returns updated userParameters and blockedTime
     '''
 
-    if time.time()>blocked_time or blocked_time == 0 :
+    if time.time()>blockedTime or blockedTime == 0 :
 
         while True:
             try:
@@ -87,12 +96,13 @@ def authorize_user(username, userParameters, blocked_time, predeterminedHeight):
                         pin = input("Set your PIN: ")
                         userParameters[username] = {
                             'pin': pin,
-                            'predeterminedHeight': predeterminedHeight
+                            'predeterminedHeight': predeterminedHeight,
+                            'distanceRange': 15
                         }
                         print("Profile created successfully!")
                     else:
                         print('Username already exists!')
-                    return userParameters, blocked_time
+                    return userParameters, blockedTime
                 elif decision == 'N':
                     subsequentProfile = input("Do you already have a profile (Y/N)? ")
                     subsequentProfile = subsequentProfile.upper() # so if the user inputs Y/y, N/n - either way the input is accepted
@@ -106,7 +116,7 @@ def authorize_user(username, userParameters, blocked_time, predeterminedHeight):
                     elif subsequentProfile == 'N':
                         print("\nGoing back to main menu...")
                         time.sleep(1)
-                        return userParameters, blocked_time
+                        return userParameters, blockedTime
                     elif decision != 'Y' or 'N':
                         print("Please enter Y or N.")
                 elif decision != 'Y' or 'N':
@@ -114,26 +124,26 @@ def authorize_user(username, userParameters, blocked_time, predeterminedHeight):
             except KeyboardInterrupt:
                 print("\nGoing back to main menu...") # handling for wanting to go back to main menu anywhere in the loop
                 time.sleep(1)
-                return userParameters,blocked_time
+                return userParameters,blockedTime
 
-        #ask for PIN, 5 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
+        #ask for PIN, 3 times max, then return to main menu (Lock person out of system settings) (for maintenace adjustment mode)
         for tries in range(3):
             userPin = input('\nEnter PIN: ')
             if userPin == userParameters[username]['pin']:
                 print("PIN accepted.")
-                return display_maintenance_menu(username, userParameters,blocked_time)
+                return display_maintenance_menu(username, userParameters,blockedTime)
             else:
                 print('Incorrect PIN!')
                 start = time.time()
-                blocked_time = start + 120
+                blockedTime = start + 120
         print("\n == You've exceeded the number of tries available and have been locked out for 2 minutes. == \nReturning to the main menu..." )
         
-        return userParameters, blocked_time
+        return userParameters, blockedTime
     
     else:
         print("Too many tries! You have been locked out of the system.")
-        print("Time remaining:", int((blocked_time-time.time())//60), 'min' ,round((blocked_time-time.time())%60), 's' )
-        return userParameters, blocked_time
+        print("Time remaining:", int((blockedTime-time.time())//60), 'min' ,round((blockedTime-time.time())%60), 's' )
+        return userParameters, blockedTime
 
 
 def normal_mode(username, userParameters, dataList,dataList2,thermistorList, predeterminedHeight, board):
@@ -142,10 +152,13 @@ def normal_mode(username, userParameters, dataList,dataList2,thermistorList, pre
         Parameters:
             username (key): stores username of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
-            data_list (list of integers): list of latest values (distances in cm) polled from the sensor
+            dataList (list of integers): list of latest values (distances in cm) polled from the sensor
+            dataList2 (list of integers): list of latest values (heights in cm) polled from the sensor
+            thermistorList (list of floats): list of latest values (temperatures in degree C) polled from thermistor
+            predeterminedHeight (int): height limit of vehicles
             board: communication set-up with arduino
         Returns:
-            Function returns updated data_list (renamed polledData)
+            Function returns updated dataList, dataList2, and thermistorData
     """
     if not userParameters:
         print("\nNo users found.")
@@ -154,73 +167,120 @@ def normal_mode(username, userParameters, dataList,dataList2,thermistorList, pre
     
     username = list(userParameters.keys())[0] # Get the user from the dictionary
     predeterminedHeight = userParameters[username]["predeterminedHeight"]
-    polledData = dataList  # Initialize polledData here (check notes)
+    polledData = dataList  # Initialize polledData here
     polledData2 = dataList2
 
-    #TODO: Adjust the sensor loop time depending on stage time
+    if slide_switch_on(board, 8):
+        print("\nSlide Switch has been turned ON! Exiting to main menu....")
+        return polledData, polledData2, thermistorList
 
     while True:
         try:
-            pedestrianPresses = 0
+            pedestrianPresses = -1
             stage_one(board)
             start = 0 
             start= time.time() 
             end = time.time()
-            stage_time = 30
-            while end <  start + stage_time: 
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle = polling_loop(board, polledData, polledData2, "STG1",pedestrianPresses, predeterminedHeight, thermistorList)
-                if dayNightCycle == 'night':
-                    stage_time = 45
-                if len(thermistorList) > 1 and thermistorList[-1] > 35:
-                    stage_time += 5
+            stageChangedCycle = False
+            stageChangedThermistor = False
+            stageChangedButton = False
+            stageTime = 30
+            while end <  start + stageTime: 
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn = polling_loop(board, polledData, polledData2, "STG1",pedestrianPresses, predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
+                if dayNightCycle == 'night' and stageChangedCycle == False:
+                    stageTime = 45
+                    stageChangedCycle = True
+                if len(thermistorList) >= 1 and thermistorList[-1] > 35 and stageChangedThermistor == False:
+                    stageTime += 5
+                    stageChangedThermistor = True
+                
+                if pedestrianPresses > 0 and stageChangedButton == False:
+                    if (stageTime - (time.time()-start) ) > 5:
+                        stageTime = (time.time()-start) + 5
+                        stageChangedButton = True
+                print('TOTAL STAGE TIME NOW: ', round(stageTime))
                 end = time.time()
-                #dist_to_nearest_vehicle(int(start-end), polledData)
+                dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_two(board)
             start = 0 
             start = time.time()
-            while end < start + 3: 
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle = polling_loop(board, polledData, polledData2, "STG2",pedestrianPresses, predeterminedHeight, thermistorList)
+            stageChangedDist = False
+            stageTime = 3
+            while end < start + stageTime: 
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn = polling_loop(board, polledData, polledData2, "STG2",pedestrianPresses, predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
+                if polledData[-1] <= userParameters[username]["distanceRange"] and stageChangedDist == False:
+                    print('== EXTENDING YELLOW LIGHT TIME BY 3 SECONDS.......')
+                    stageTime += 3
+                    stageChangedDist = True
                 end = time.time()
-                print(end-start)
-                #dist_to_nearest_vehicle(int(start-end), polledData)
+                dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_three(board)
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG3",pedestrianPresses, predeterminedHeight, thermistorList)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn = polling_loop(board, polledData, polledData2, "STG3",pedestrianPresses, predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
+
             #stage three with print pedestrian count 
-            print('Number of Pedestrain Button Presses:',pedestrianPresses-1) #FIX THE -1
+            if pedestrianPresses == -1:
+                print('Number of Pedestrain Button Presses:',0)
+            else:
+                print('Number of Pedestrain Button Presses:',pedestrianPresses)
 
             stage_four(board)
             start = 0 
             start = time.time()
-            stage_time = 30
-            while end < start + stage_time:
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG4",pedestrianPresses, predeterminedHeight, thermistorList)
-                if dayNightCycle == 'night':
-                    stage_time = 10
-                if len(thermistorList) > 1 and thermistorList[-1] > 35:
-                    stage_time += 5
+            stageTime = 30
+            stageChangedCycle = False
+            stageChangedThermistor = False
+            while end < start + stageTime:
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn  = polling_loop(board, polledData, polledData2, "STG4",pedestrianPresses, predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
+                if dayNightCycle == 'night' and stageChangedCycle == False:
+                    stageTime = 10
+                    stageChangedCycle = True
+                if len(thermistorList) > 1 and thermistorList[-1] > 35 and stageChangedThermistor == False:
+                    stageTime += 5
+                    stageChangedThermistor = True
+
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
             stage_five(board)
+            board.digital_write(9, 1) #for stage five buzzer
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG5",pedestrianPresses,predeterminedHeight, thermistorList)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn  = polling_loop(board, polledData, polledData2, "STG5",pedestrianPresses,predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
+            board.digital_write(9, 0)
 
             stage_six(board)
             start = 0 
             start = time.time()
             while end < start + 3:
-                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle  = polling_loop(board, polledData, polledData2, "STG6",pedestrianPresses, predeterminedHeight, thermistorList)
+                pedestrianPresses, polledData,polledData2,thermistorList, dayNightCycle, slideSwitchIsOn = polling_loop(board, polledData, polledData2, "STG6",pedestrianPresses, predeterminedHeight, thermistorList)
+                if slideSwitchIsOn:
+                    print('\nSlide Switch has been turned ON! Exiting to main menu....')
+                    return polledData, polledData2, thermistorList
                 end = time.time()
                 dist_to_nearest_vehicle(int(start-end), polledData)
 
@@ -236,42 +296,56 @@ def polling_loop(board, polledData,polledData2, stage, pedestrianPresses, predet
         Parameters:
             board: communication set-up with arduino
             polledData (list of integers): list of latest values (distances in cm) polled from the sensor
+            polledData2 (list of integers): list of latest values (heights in cm) polled from the sensor
             stage (str): the current stage number
             pedestrianPresses (int): number of presses detected
+            predeterminedHeight (int): height limit of vehicles
+            thermistorList (list of floats): list of latest values (temperatures in degree C) polled from thermistor  
         Returns:
-            Function returns updated pedestrianPresses and polledData
+            Function returns updated pedestrianPresses, polledData, polledData2, thermistorList and the 
+            states of the slide switch and day/night cycle from LDR
     """
 
     start = time.time()
-    polledData = ultraSonic(12, 13,board, polledData)
+    polledData = ultraSonic(12, 13,board, polledData,stage)
     polledData2 = ultrasonic_height(6,7,board, polledData2, predeterminedHeight)
     thermistorList = thermistor(board, thermistorList)
     cycle = read_LDR(0, board)
     end2 = time.time()
+    slideSwitchIsOn = False
     
     if stage in ["STG1", "STG2", "STG3"]:
         while end2 - start < 3:
-            pedestrianPresses = pedPresence(5,board,pedestrianPresses)
+            pedestrianPresses = ped_presence(2,board,pedestrianPresses) #CHANGE PIN
+            slideSwitchIsOn = slide_switch_on(board, 8)
+            if slideSwitchIsOn:
+                return pedestrianPresses, polledData,polledData2,thermistorList, cycle, slideSwitchIsOn
+
             time.sleep(0.2)
             end2 = time.time()
     else:
-        time.sleep(abs(3-(end2-start)))  
+        while time.time() - start < 3:
+            slideSwitchIsOn = slide_switch_on(board, 8)
+            if slideSwitchIsOn:
+                return pedestrianPresses, polledData,polledData2,thermistorList, cycle, slideSwitchIsOn
+            time.sleep(0.2)
+        #time.sleep(abs(3-(end2-start)))  
     
     end3 = time.time()
     difference2 = end3 - start
     pollingTime = round(difference2, 2)
     print(f'Time Taken: {pollingTime} seconds')
-    return pedestrianPresses, polledData,polledData2,thermistorList, cycle
+    return pedestrianPresses, polledData,polledData2,thermistorList, cycle, slideSwitchIsOn
 
-def display_maintenance_menu(username, userParameters, blocked_time):
+def display_maintenance_menu(username, userParameters, blockedTime):
     """
     Displays menu for Maintenace Adjustment Mode menu.
         Parameters:
             username (key): stores username of profile.
             userParameters (dict): contains a dictionary of stored user profiles.
-            authorization (str): determines whether user is allowed access to maintenance adjustment mode
+            blockedTime (int): time for which the user is blocked from maintenance mode
         Returns:
-            Function returns userParameters and authorization.
+            Function returns userParameters and blockedTime.
     """
     start = time.time()
 
@@ -279,6 +353,7 @@ def display_maintenance_menu(username, userParameters, blocked_time):
     print ("\n=== Maintenence Adjustment Menu ===\n")
     print("1: Change PIN")
     print("2: View/update predetermined vehicle height in cm")
+    print("3. View/update vehicle distance to extend main road yellow light in cm")
     print("0: Return to main menu\n")
 
     selection = -1
@@ -287,9 +362,9 @@ def display_maintenance_menu(username, userParameters, blocked_time):
             selection = int(input("Option: "))
             if time.time() - start > 60:
                 print("Connection Timed Out! Returning to main menu....")
-                return userParameters, blocked_time
+                return userParameters, blockedTime
 
-            if selection in [0, 1, 2]:
+            if selection in [0, 1, 2, 3]:
                 break
             else:
                 print("Invalid Option")
@@ -302,7 +377,7 @@ def display_maintenance_menu(username, userParameters, blocked_time):
 
         if time.time() - start > 60:
             print("Connection Timed Out! Returning to main menu....")
-            return userParameters, blocked_time
+            return userParameters, blockedTime
 
         print ("PIN changed!")
         userParameters[username]['pin'] = newPin
@@ -314,7 +389,7 @@ def display_maintenance_menu(username, userParameters, blocked_time):
 
             if time.time() - start > 60:
                 print("Connection Timed Out! Returning to main menu....")
-                return userParameters, blocked_time
+                return userParameters, blockedTime
             
             if newDistance < 10 or newDistance>23:
                 print("Please enter a height between 10-23 cm (inclusive)!")
@@ -324,16 +399,35 @@ def display_maintenance_menu(username, userParameters, blocked_time):
         
         print('Height changed!')
         userParameters[username]['predeterminedHeight'] = newDistance
+    elif selection == 3:
+        while True:
+            print(f"\nCurrent distance is {userParameters[username]['distanceRange']} cm")
+            newDistance = int(input("Enter new distance: "))
+
+            if time.time() - start > 60:
+                print("Connection Timed Out! Returning to main menu....")
+                return userParameters, blockedTime
+            
+            if newDistance < 10 or newDistance>20:
+                print("Please enter a distance between 10-20 cm (inclusive)!")
+                pass
+            else:
+                break
+        
+        print('Distance changed!')
+        userParameters[username]['distanceRange'] = newDistance
     elif selection == 0:
         print('\nBack to main menu...')
 
-    return userParameters, blocked_time
+    return userParameters, blockedTime
 
 def display_data_observation_menu(polledData, polledData2, thermistorData):
     """
     Displays the Data Observation Mode menu.
         Parameters:
             polledData (list of integers): Conatins the latest data (distances in cm) polled from sensor.
+            polledData2 (list of integers): list of latest values (heights in cm) polled from the sensor
+            thermistorData (list of floats): list of latest values (temperatures in degree C) polled from thermistor
         Returns:
             Function has no returns
     """
@@ -351,7 +445,7 @@ def display_data_observation_menu(polledData, polledData2, thermistorData):
     while True:
         try:
             choice = int(input("Option: "))
-            if choice in [0, 1, 2, 3]:
+            if choice in [0, 1, 2, 3, 4, 5]:
                 break
             else:
                 print("Error: Invalid option")
@@ -666,11 +760,11 @@ def main():
     polledData2 = []
     predeterminedHeight = 21
     board = pymata4.Pymata4() #set up arduino connection
-    blocked_time = 0 #time used for authorization
+    blockedTime = 0 #time used for authorization
     thermistorList = []
 
     while True:
-        username, userParameters, polledData, polledData2, thermistorList, predeterminedHeight, blocked_time = display_main_menu(username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, board, blocked_time)
+        username, userParameters, polledData, polledData2, thermistorList, predeterminedHeight, blockedTime= display_main_menu(username, userParameters, polledData,polledData2,thermistorList, predeterminedHeight, board, blockedTime)
 
 if __name__ == '__main__':
     main()

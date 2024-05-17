@@ -3,7 +3,7 @@
 # Created Date: 20/04/2024
 # version: 5.0
 
-def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
+def ultraSonic(triggerPin,echoPin,board,ultrasonicData, stage):
     '''
     Function to read data from ultrasonic sensor
         Parameters:
@@ -29,7 +29,10 @@ def ultraSonic(triggerPin,echoPin,board,ultrasonicData):
     if len(ultrasonicData)==8:    
         ultrasonicData.pop(0)
 
-    print(f'\nData from Ultrasonic Sensor: {ultrasonicData}')
+    print(f'\nData from Distance Ultrasonic Sensor: {ultrasonicData}')
 
+    if stage == 'STG1' and len(ultrasonicData)>=3:
+        if ultrasonicData[-1] == ultrasonicData[-2]:
+            print('== Vehicle Distance has been constant for more than 3 seconds! ==')
     return ultrasonicData
   

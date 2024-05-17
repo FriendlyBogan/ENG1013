@@ -1,9 +1,20 @@
+# Contains functions to read temperature data from thermistor
+# Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
+# Created Date: 10/05/2024
+# version: 4.0
+
 import math
 
-
 def thermistor(board, dataList):
+    '''
+    Function to display a single digit
+        Parameters:
+            board: communication with arduino
+            dataList(list of floats): list of latest values (temperatures in degree C) polled from thermistor
+        Returns:
+            returns updated dataList
+    '''
 
-    analog_pin = 1
     board.set_pin_mode_analog_input(1)
 
     value, timeStamp = board.analog_read(1)
@@ -21,17 +32,9 @@ def thermistor(board, dataList):
         thermistorValue = resistor2/1000
         temp = round(-21.21 * math.log1p(thermistorValue) + 72.203,2)
         print('Current Temperature:', temp, '°C')
-        dataList.append(temp)
+        if temp<51 and temp>-3:
+            dataList.append(temp)
 
     if len(dataList) > 7:
         dataList.pop(0)
     return dataList
-
-'''         
-def main():
-    while True:
-        thermistor(board, stage=0)
-
-if __name__ == '__main__':
-    main()
-'''

@@ -1,3 +1,8 @@
+# Contains functions to control and display message on the seven segment display
+# Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
+# Created Date: 19/04/2024
+# version: 8.0
+
 lookUp = {
     ' ': "0000000",
     '"': "0100010",
@@ -100,14 +105,23 @@ RCLK = 9;  #latchPIN
 SRCLK = 10; #clockPIN
 SER = 8 #data 
 
-def single_digit(board, bin_string): 
+def single_digit(board, binString):
+    '''
+    Function to display a single digit
+        Parameters:
+            board: communication with arduino
+            binString (str): binary for the digit
+
+        Returns:
+            Function has no returns
+    '''
     
     #first digit is decimal point
     turn_on = '11111110'
     turn_off = '00000000'
-    bin_string = '0' + bin_string[::-1]
+    binString = '0' + binString[::-1]
 
-    for ch in bin_string:
+    for ch in binString:
         board.digital_write(SER, int(ch)) 
         board.digital_write(SRCLK, 1)
         board.digital_write(SRCLK, 0)
@@ -130,13 +144,22 @@ def single_digit(board, bin_string):
 
 
 def userinput_sevenseg():
+    '''
+    Function to obtain input from user.
+        Parameters:
+            Function has no parameters
+
+        Returns:
+            Function has no returns
+    '''
+
     board = pymata4.Pymata4()
     sevenseg_pin_set_up(board)
     while True:
         try:
             print('--------------------------------------------------------------------------------')
             message = input("\nEnter a 4 digit alphanumeric message to display on the Seven Segment display: ")
-            if len(message)<1:
+            if len(message)<1 or len(message)>4:
                 print("Invalid Message!")
                 continue
             
@@ -152,6 +175,13 @@ def userinput_sevenseg():
 
 
 def sevenseg_pin_set_up(board):
+    '''
+    Function to set up the pins on arduino
+        Parameters:
+            board: communication with arduino
+        Returns:
+            Function has no returns
+    '''
     #setting up pin 
     board.set_pin_mode_digital_output(RCLK)
     board.set_pin_mode_digital_output(SRCLK)
@@ -162,29 +192,15 @@ def sevenseg_pin_set_up(board):
         board.set_pin_mode_digital_output(pin)
         board.digital_write(pin,1)
 
-'''
-def display_sevenseg(board, message):
-   
-
-    start = time.time()
-    display_message = message
-    
-    
-    for dig in range(len(display_message)):
         
-        board.digital_write(digPins[dig],0)
-        for x in lookUp.keys():
-            if x == display_message[dig]:
-                single_digit(board, lookUp[x])
-
-        board.digital_write(digPins[dig],1)
-        
-    end = time.time()
-    return (1/(end-start))
-'''
-        
-
 def clear_display(board):
+    '''
+    Function to clear the display
+        Parameters:
+            board: communication with arduino
+        Returns:
+            Function has no returns
+    '''
     for ch in '00000000':
         board.digital_write(SER, int(ch)) 
         board.digital_write(SRCLK, 1)
@@ -195,6 +211,15 @@ def clear_display(board):
 
 
 def display_sevenseg_inf(board,message):
+    '''
+    Function to display all the digits infinitely till keyboard interrupt.
+        Parameters:
+            board: communication with arduino
+            message(str): message to display
+
+        Returns:
+            Function has no returns
+    '''
 
     digPins = [7,6,5,4]
     RCLK = 9;  #latchPIN

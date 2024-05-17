@@ -1,13 +1,13 @@
-# Function to create graph from sensor data
+# Function to create graphs from inputs provided by thermistor, height sensor and distance sensor
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
 # Created Date: 20/04/2024
-# version: 5.0
+# version: 6.0
 
 import matplotlib.pyplot as plt
 
 def graphing_distance(polledData):
     '''
-    Function to create graph from sensor data
+    Function to create graph from ultrasonic sensor distance data
         Parameters:
             polledData (list of integers): list of latest values (distances in cm) polled from the sensor
         Returns:
@@ -29,9 +29,9 @@ def graphing_distance(polledData):
 
 def graphing_height(polledData2):
     '''
-    Function to create graph from sensor data
+    Function to create graph from ultrasonic sensor height data
         Parameters:
-            polledData (list of integers): list of latest values (distances in cm) polled from the sensor
+            polledData2 (list of integers): list of latest values (heights in cm) polled from the sensor
         Returns:
             Function has no returns
     '''
@@ -53,7 +53,7 @@ def graphing_temperature(thermistorData):
     '''
     Function to create graph from sensor data
         Parameters:
-            polledData (list of integers): list of latest values (distances in cm) polled from the sensor
+            thermistorData (list of floats): list of latest values (tempertatures in degree C) polled from the thermistor
         Returns:
             Function has no returns
     '''

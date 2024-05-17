@@ -1,9 +1,8 @@
-# Contains function to read data from ultrasonic sensor
+# Contains function to read vehicle height data from ultrasonic sensor
 # Created By : Team A12: Nudara, Cooper, Devni, Kristian, Naailah
-# Created Date: 20/04/2024
+# Created Date: 14/05/2024
 # version: 5.0
 
-from pymata4 import pymata4
 import time
 
 def ultrasonic_height(triggerPin,echoPin,board,ultrasonicData, predeterminedHeight):
@@ -39,8 +38,15 @@ def ultrasonic_height(triggerPin,echoPin,board,ultrasonicData, predeterminedHeig
     print(f'Height of vehicle: {ultrasonicData}')
     return ultrasonicData
 
-#create a function for LEDS, use while loop to keep it flashing for 6s
+
 def flashing_leds(board):
+    '''
+    Function to flash RGB red and yellow when vehicle height is greater than predetermined height
+        Parameters:
+            board: communication with arduino
+        Returns:
+            Function has no returns
+    '''
     redPin = 3 #change the pin number accordingly
     greenPin = 4
     bluePin = 5
@@ -75,14 +81,3 @@ def flashing_leds(board):
         board.digital_write(greenPin, 0)
         board.digital_write(bluePin, 0)
 
-
-def main():
-    board = pymata4.Pymata4()
-    predeterminedHeight = 21
-    ultrasonicData2 = []
-
-    while True:
-        ultrasonic_height(9, 10, board, ultrasonicData2, predeterminedHeight)
-
-if __name__ == '__main__':
-    main()
